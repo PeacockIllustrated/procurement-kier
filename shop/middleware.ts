@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   try {
     const { pathname } = req.nextUrl;
 
@@ -42,7 +42,7 @@ export function proxy(req: NextRequest) {
     }
 
     return NextResponse.next();
-  } catch {
+  } catch (_e) {
     // Never crash — allow access if middleware fails
     return NextResponse.next();
   }
