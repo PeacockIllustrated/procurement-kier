@@ -97,6 +97,7 @@ export default function CustomSignPage() {
   const { addItem } = useBasket();
   const router = useRouter();
   const [added, setAdded] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [form, setForm] = useState({
     signType: "warning",
     textContent: "",
@@ -134,7 +135,7 @@ export default function CustomSignPage() {
         shape: form.shape,
         additionalNotes: form.additionalNotes,
       },
-    });
+    }, quantity);
 
     setAdded(true);
     setTimeout(() => setAdded(false), 3000);
@@ -298,6 +299,30 @@ export default function CustomSignPage() {
                 </select>
               </div>
             </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">
+                Quantity *
+              </label>
+              <div className="inline-flex items-center border border-gray-200 rounded-xl bg-white">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-persimmon-green transition text-lg font-medium"
+                >
+                  &minus;
+                </button>
+                <span className="w-12 text-center text-sm font-semibold text-persimmon-navy tabular-nums">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-persimmon-green transition text-lg font-medium"
+                >
+                  +
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Additional Notes */}
@@ -357,6 +382,12 @@ export default function CustomSignPage() {
                   {form.material}
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Quantity</span>
+                <span className="font-medium text-gray-700">
+                  {quantity}
+                </span>
+              </div>
               <div className="flex justify-between pt-2 border-t border-gray-100">
                 <span className="text-gray-400">Price</span>
                 <span className="font-semibold text-amber-600">
@@ -387,6 +418,7 @@ export default function CustomSignPage() {
                   type="button"
                   onClick={() => {
                     setAdded(false);
+                    setQuantity(1);
                     setForm((prev) => ({ ...prev, textContent: "", additionalNotes: "" }));
                   }}
                   className="flex-1 text-center text-sm font-medium text-gray-500 border border-gray-200 rounded-xl py-2 hover:bg-gray-50 transition"
