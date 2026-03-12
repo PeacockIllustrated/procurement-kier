@@ -51,6 +51,7 @@ export default function OrdersPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; code: string } | null>(null);
 
   useEffect(() => {
@@ -62,6 +63,20 @@ export default function OrdersPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  const contactCards = useMemo(() => {
+    const contactMap = new Map<string, { contactId: string; name: string; email: string; orderCount: number }>();
+    for (const o of orders) {
+      if (!o.contactId) continue;
+      let entry = contactMap.get(o.contactId);
+      if (!entry) {
+        entry = { contactId: o.contactId, name: o.contact.contactName, email: o.contact.email, orderCount: 0 };
+        contactMap.set(o.contactId, entry);
+      }
+      entry.orderCount++;
+    }
+    return Array.from(contactMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [orders]);
 
   const siteCards = useMemo(() => {
     const siteMap = new Map<string, { siteId: string; name: string; address: string; statuses: Record<string, number> }>();
@@ -79,6 +94,7 @@ export default function OrdersPage() {
 
   const filteredOrders = useMemo(() => {
     let result = orders;
+    if (selectedContactId) result = result.filter((o) => o.contactId === selectedContactId || !o.contactId);
     if (selectedSiteId) result = result.filter((o) => o.siteId === selectedSiteId || !o.siteId);
     if (filter !== "all") result = result.filter((o) => o.status === filter);
     if (search.trim()) {
@@ -91,7 +107,7 @@ export default function OrdersPage() {
       );
     }
     return result;
-  }, [orders, filter, search, selectedSiteId]);
+  }, [orders, filter, search, selectedSiteId, selectedContactId]);
 
   if (loading) {
     return (
@@ -136,6 +152,48 @@ export default function OrdersPage() {
           Back to shop
         </Link>
       </div>
+
+      {/* Contact pills */}
+      {contactCards.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-sm font-semibold text-persimmon-navy">Ordered By</h2>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {contactCards.map((contact) => {
+              const isSelected = selectedContactId === contact.contactId;
+              const initials = contact.name
+                .split(" ")
+                .map((w) => w[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              // Deterministic soft colour from name
+              const hue = Array.from(contact.name).reduce((h, c) => h + c.charCodeAt(0), 0) % 360;
+              return (
+                <button
+                  key={contact.contactId}
+                  onClick={() => setSelectedContactId(isSelected ? null : contact.contactId)}
+                  className={`flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full border-2 transition-all whitespace-nowrap shrink-0 ${
+                    isSelected
+                      ? "border-persimmon-green bg-white shadow-sm"
+                      : "border-gray-100 bg-white hover:border-gray-200"
+                  }`}
+                >
+                  <span
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                    style={{ backgroundColor: `hsl(${hue}, 45%, 55%)` }}
+                  >
+                    {initials}
+                  </span>
+                  <span className="text-sm font-medium text-persimmon-navy">{contact.name}</span>
+                  <span className="text-[11px] text-gray-400">{contact.orderCount}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Site bento cards */}
       {siteCards.length > 0 && (
@@ -188,18 +246,43 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Active site filter indicator */}
-      {selectedSiteId && (
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-sm text-persimmon-navy font-medium">
-            Showing: {siteCards.find((s) => s.siteId === selectedSiteId)?.name}
-          </span>
-          <button
-            onClick={() => setSelectedSiteId(null)}
-            className="text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-0.5 hover:bg-gray-50 transition"
-          >
-            Clear filter
-          </button>
+      {/* Active filter indicators */}
+      {(selectedContactId || selectedSiteId) && (
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          {selectedContactId && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-persimmon-navy font-medium">
+                By: {contactCards.find((c) => c.contactId === selectedContactId)?.name}
+              </span>
+              <button
+                onClick={() => setSelectedContactId(null)}
+                className="text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-0.5 hover:bg-gray-50 transition"
+              >
+                &times;
+              </button>
+            </div>
+          )}
+          {selectedSiteId && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-persimmon-navy font-medium">
+                Site: {siteCards.find((s) => s.siteId === selectedSiteId)?.name}
+              </span>
+              <button
+                onClick={() => setSelectedSiteId(null)}
+                className="text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-0.5 hover:bg-gray-50 transition"
+              >
+                &times;
+              </button>
+            </div>
+          )}
+          {selectedContactId && selectedSiteId && (
+            <button
+              onClick={() => { setSelectedContactId(null); setSelectedSiteId(null); }}
+              className="text-xs text-persimmon-green font-medium hover:underline transition"
+            >
+              Clear all
+            </button>
+          )}
         </div>
       )}
 
