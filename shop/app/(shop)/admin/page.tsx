@@ -51,6 +51,8 @@ export default function AdminPage() {
   const [tab, setTab] = useState<"orders" | "suggestions">("orders");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [sugFilter, setSugFilter] = useState("all");
+  const [sendingToNest, setSendingToNest] = useState<string | null>(null);
+  const [nestError, setNestError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/orders")
@@ -104,6 +106,31 @@ export default function AdminPage() {
     setOrders((prev) =>
       prev.map((o) => (o.orderNumber === orderNumber ? { ...o, status: newStatus } : o))
     );
+  };
+
+  const sendToNest = async (orderNumber: string) => {
+    if (!confirm(`Send PO request to Nest for ${orderNumber}?`)) return;
+    setSendingToNest(orderNumber);
+    setNestError(null);
+    try {
+      const res = await fetch(`/api/orders/${orderNumber}/send-to-nest`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setNestError(data.error || "Failed to send PO request");
+        return;
+      }
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.orderNumber === orderNumber ? { ...o, status: "awaiting_po" } : o
+        )
+      );
+    } catch {
+      setNestError("Network error — please try again");
+    } finally {
+      setSendingToNest(null);
+    }
   };
 
   if (loading) {
@@ -260,7 +287,7 @@ export default function AdminPage() {
               <div key={order.orderNumber}>
                 {/* Order summary card */}
                 <button
-                  onClick={() => setExpandedOrder(isExpanded ? null : order.orderNumber)}
+                  onClick={() => { setExpandedOrder(isExpanded ? null : order.orderNumber); setNestError(null); }}
                   className={`w-full text-left bg-white border p-5 transition-all hover:shadow-md ${
                     isExpanded
                       ? "border-persimmon-green shadow-md rounded-t-2xl rounded-b-none border-b-0"
@@ -312,17 +339,34 @@ export default function AdminPage() {
                       <p className="text-xs text-gray-400">
                         {new Date(order.createdAt).toLocaleString("en-GB")}
                       </p>
-                      <select
-                        value={order.status}
-                        onChange={(e) => updateStatus(order.orderNumber, e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-persimmon-green/15"
-                      >
-                        <option value="new">New</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                      </select>
+                      <div className="flex items-center gap-2">
+                        {(order.status === "new" || order.status === "awaiting_po") && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); sendToNest(order.orderNumber); }}
+                            disabled={sendingToNest === order.orderNumber}
+                            className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 text-sm font-medium rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {sendingToNest === order.orderNumber ? "Sending..." : order.status === "awaiting_po" ? "Re-send to Nest" : "Send to Nest"}
+                          </button>
+                        )}
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateStatus(order.orderNumber, e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="border border-gray-200 rounded-xl px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-persimmon-green/15"
+                        >
+                          <option value="new">New</option>
+                          <option value="awaiting_po">Awaiting PO</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                        </select>
+                      </div>
                     </div>
+                    {nestError && expandedOrder === order.orderNumber && (
+                      <div className="mb-4 px-4 py-2.5 bg-red-50 text-red-600 text-sm rounded-xl">
+                        {nestError}
+                      </div>
+                    )}
 
                     <div className="space-y-5">
                       <div className="grid grid-cols-2 gap-4">
