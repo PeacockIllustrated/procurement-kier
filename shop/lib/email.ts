@@ -268,3 +268,73 @@ export async function sendTeamNotification(order: OrderData): Promise<void> {
   }
   console.log(`Team notification email sent to ${teamEmail}`);
 }
+
+export async function sendNestPORequest(order: OrderData): Promise<void> {
+  const nestEmail = process.env.NEST_EMAIL;
+  if (!nestEmail) {
+    throw new Error("NEST_EMAIL environment variable is not configured");
+  }
+
+  const fromEmail = process.env.FROM_EMAIL || "onboarding@resend.dev";
+  const siteUrl = process.env.SITE_URL || "http://localhost:3000";
+  const attachments = buildImageAttachments(order.items, siteUrl);
+
+  const { error } = await resend.emails.send({
+    from: `Persimmon Signage Portal <${fromEmail}>`,
+    to: nestEmail,
+    subject: `PO Request — ${order.orderNumber} — ${esc(order.siteName)}`,
+    attachments,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <div style="background:#00474a;padding:24px 32px;border-radius:12px 12px 0 0">
+          <h1 style="color:white;margin:0;font-size:20px">Purchase Order Request</h1>
+        </div>
+        <div style="padding:32px;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px 20px;margin-bottom:24px">
+            <p style="margin:0;font-size:18px;font-weight:bold;color:#00474a">${order.orderNumber}</p>
+            <p style="margin:4px 0 0;font-size:14px;color:#666">&pound;${order.total.toFixed(2)} inc. VAT &middot; ${order.items.length} items</p>
+          </div>
+
+          <div style="display:flex;gap:24px;margin-bottom:24px">
+            <div>
+              <p style="font-size:12px;color:#999;text-transform:uppercase;margin:0 0 4px">Contact</p>
+              <p style="margin:0;font-size:14px"><strong>${esc(order.contactName)}</strong></p>
+              <p style="margin:2px 0;font-size:14px;color:#666">${esc(order.email)}</p>
+              <p style="margin:0;font-size:14px;color:#666">${esc(order.phone)}</p>
+            </div>
+            <div>
+              <p style="font-size:12px;color:#999;text-transform:uppercase;margin:0 0 4px">Site</p>
+              <p style="margin:0;font-size:14px"><strong>${esc(order.siteName)}</strong></p>
+              <p style="margin:2px 0;font-size:14px;color:#666">${esc(order.siteAddress)}</p>
+            </div>
+          </div>
+
+          ${order.poNumber ? `<p style="font-size:14px;color:#666;margin-bottom:16px"><strong>Customer PO:</strong> ${esc(order.poNumber)}</p>` : ""}
+
+          ${order.notes ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin-bottom:24px"><p style="margin:0;font-size:13px;color:#c2410c"><strong>Notes:</strong> ${esc(order.notes)}</p></div>` : ""}
+
+          <table style="width:100%;border-collapse:collapse;margin:20px 0">
+            <thead>
+              <tr style="background:#f5f5f5">
+                <th style="padding:8px 12px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;width:48px"></th>
+                <th style="padding:8px 8px;text-align:left;font-size:12px;color:#666;text-transform:uppercase">Product</th>
+                <th style="padding:8px 8px;text-align:center;font-size:12px;color:#666;text-transform:uppercase">Qty</th>
+                <th style="padding:8px 12px 8px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemRowsHtml(order.items)}
+            </tbody>
+            <tfoot>
+              ${totalsHtml(order.subtotal, order.vat, order.total, order.items.some(i => !!i.custom_data))}
+            </tfoot>
+          </table>
+        </div>
+      </div>`,
+  });
+
+  if (error) {
+    throw new Error(`Nest PO request email failed: ${error.message}`);
+  }
+  console.log(`Nest PO request email sent to ${nestEmail} for ${order.orderNumber}`);
+}
