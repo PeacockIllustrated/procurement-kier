@@ -41,13 +41,39 @@ export async function GET(
       );
     }
 
+    const siteUrl = process.env.SITE_URL || "http://localhost:3000";
+
+    // Prevent duplicate PO raises — only allow from "new" status
+    if (order.status !== "new") {
+      return new NextResponse(
+        `<!DOCTYPE html>
+        <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>PO Already Raised</title></head>
+        <body style="font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8faf9">
+          <div style="text-align:center;padding:40px;background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:400px">
+            <div style="width:48px;height:48px;background:#00474a;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+              <span style="color:white;font-size:24px">&#10003;</span>
+            </div>
+            <h1 style="color:#00474a;font-size:20px;margin:0 0 8px">PO Already Raised</h1>
+            <p style="color:#666;font-size:14px;margin:0">Order <strong>${orderNumber}</strong> has already been sent for purchase order processing.</p>
+            <a href="${siteUrl}/admin" style="display:inline-block;margin-top:20px;background:#3db28c;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold">View in Admin Dashboard</a>
+          </div>
+        </body></html>`,
+        { status: 200, headers: { "Content-Type": "text/html" } }
+      );
+    }
+
+    // Update status immediately to prevent race conditions from double-clicks
+    await supabase
+      .from("psp_orders")
+      .update({ status: "awaiting_po" })
+      .eq("order_number", orderNumber);
+
     // Fetch order items
     const { data: items } = await supabase
       .from("psp_order_items")
       .select("*")
       .eq("order_id", order.id);
-
-    const siteUrl = process.env.SITE_URL || "http://localhost:3000";
 
     const orderData = {
       orderNumber: order.order_number,
@@ -102,14 +128,6 @@ export async function GET(
 
     console.log(`Raise PO webhook fired for ${orderNumber} — ${res.status}`);
 
-    // Update status to awaiting_po if currently new
-    if (order.status === "new") {
-      await supabase
-        .from("psp_orders")
-        .update({ status: "awaiting_po" })
-        .eq("order_number", orderNumber);
-    }
-
     // Return a simple confirmation page
     return new NextResponse(
       `<!DOCTYPE html>
@@ -122,6 +140,7 @@ export async function GET(
           </div>
           <h1 style="color:#00474a;font-size:20px;margin:0 0 8px">PO Request Sent</h1>
           <p style="color:#666;font-size:14px;margin:0">Order <strong>${orderNumber}</strong> has been sent for purchase order processing.</p>
+          <a href="${siteUrl}/admin" style="display:inline-block;margin-top:20px;background:#3db28c;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold">View in Admin Dashboard</a>
         </div>
       </body></html>`,
       { status: 200, headers: { "Content-Type": "text/html" } }
