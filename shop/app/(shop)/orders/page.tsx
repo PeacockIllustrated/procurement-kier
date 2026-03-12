@@ -24,6 +24,8 @@ interface Order {
   orderNumber: string;
   createdAt: string;
   status: string;
+  contactId: string | null;
+  siteId: string | null;
   contact: { contactName: string; email: string; phone: string };
   site: { siteName: string; siteAddress: string };
   poNumber: string | null;
@@ -48,6 +50,7 @@ export default function OrdersPage() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; code: string } | null>(null);
 
   useEffect(() => {
@@ -60,8 +63,23 @@ export default function OrdersPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  const siteCards = useMemo(() => {
+    const siteMap = new Map<string, { siteId: string; name: string; address: string; statuses: Record<string, number> }>();
+    for (const o of orders) {
+      if (!o.siteId) continue;
+      let entry = siteMap.get(o.siteId);
+      if (!entry) {
+        entry = { siteId: o.siteId, name: o.site.siteName, address: o.site.siteAddress, statuses: {} };
+        siteMap.set(o.siteId, entry);
+      }
+      entry.statuses[o.status] = (entry.statuses[o.status] || 0) + 1;
+    }
+    return Array.from(siteMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [orders]);
+
   const filteredOrders = useMemo(() => {
     let result = orders;
+    if (selectedSiteId) result = result.filter((o) => o.siteId === selectedSiteId || !o.siteId);
     if (filter !== "all") result = result.filter((o) => o.status === filter);
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -73,7 +91,7 @@ export default function OrdersPage() {
       );
     }
     return result;
-  }, [orders, filter, search]);
+  }, [orders, filter, search, selectedSiteId]);
 
   if (loading) {
     return (
@@ -118,6 +136,72 @@ export default function OrdersPage() {
           Back to shop
         </Link>
       </div>
+
+      {/* Site bento cards */}
+      {siteCards.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-sm font-semibold text-persimmon-navy">Your Sites</h2>
+            <span className="bg-persimmon-navy text-white px-2.5 py-0.5 rounded-full text-[11px] font-medium">
+              {siteCards.length} {siteCards.length === 1 ? "site" : "sites"}
+            </span>
+          </div>
+          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
+            {siteCards.map((site) => {
+              const isSelected = selectedSiteId === site.siteId;
+              return (
+                <button
+                  key={site.siteId}
+                  onClick={() => setSelectedSiteId(isSelected ? null : site.siteId)}
+                  className={`text-left p-4 rounded-xl border-2 transition-all ${
+                    isSelected
+                      ? "border-persimmon-green bg-white shadow-sm"
+                      : "border-gray-100 bg-white hover:border-gray-200"
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <p className="font-semibold text-persimmon-navy text-sm">{site.name}</p>
+                    {isSelected && (
+                      <span className="w-5 h-5 bg-persimmon-green rounded-full flex items-center justify-center shrink-0">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mb-2 line-clamp-1">{site.address}</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {Object.entries(site.statuses).map(([status, count]) => {
+                      const cfg = statusConfig[status];
+                      if (!cfg) return null;
+                      return (
+                        <span key={status} className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${cfg.color}`}>
+                          {count} {cfg.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Active site filter indicator */}
+      {selectedSiteId && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-sm text-persimmon-navy font-medium">
+            Showing: {siteCards.find((s) => s.siteId === selectedSiteId)?.name}
+          </span>
+          <button
+            onClick={() => setSelectedSiteId(null)}
+            className="text-xs text-gray-400 border border-gray-200 rounded-lg px-2 py-0.5 hover:bg-gray-50 transition"
+          >
+            Clear filter
+          </button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative mb-4">

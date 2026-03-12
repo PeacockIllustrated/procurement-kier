@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { contactName, email, phone, siteName, siteAddress, poNumber, notes, items } = body;
+    const { contactName, email, phone, siteName, siteAddress, poNumber, notes, items, contactId, siteId } = body;
 
     // Validation
     if (!contactName || !email || !phone || !siteName || !siteAddress || !items?.length) {
@@ -100,6 +100,8 @@ export async function POST(req: NextRequest) {
         site_address: String(siteAddress),
         po_number: poNumber ? String(poNumber) : null,
         notes: notes ? String(notes) : null,
+        contact_id: contactId || null,
+        site_id: siteId || null,
         subtotal,
         vat,
         total,
@@ -221,6 +223,8 @@ export async function GET() {
       orderNumber: o.order_number,
       createdAt: o.created_at,
       status: o.status,
+      contactId: o.contact_id || null,
+      siteId: o.site_id || null,
       contact: { contactName: o.contact_name, email: o.email, phone: o.phone },
       site: { siteName: o.site_name, siteAddress: o.site_address },
       poNumber: o.po_number,

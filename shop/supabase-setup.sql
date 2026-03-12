@@ -70,3 +70,33 @@ create index idx_psp_suggestions_created_at on psp_suggestions(created_at desc);
 
 alter table psp_suggestions enable row level security;
 create policy "service_psp_suggestions" on psp_suggestions for all using (true) with check (true);
+
+-- ============================================================
+-- Contacts & Sites (added 2026-03-12)
+-- ============================================================
+
+create table if not exists psp_contacts (
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null,
+  email        text not null unique,
+  phone        text not null,
+  created_at   timestamptz default now()
+);
+
+create table if not exists psp_sites (
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null unique,
+  address      text not null,
+  created_at   timestamptz default now()
+);
+
+alter table psp_contacts enable row level security;
+alter table psp_sites enable row level security;
+create policy "service_psp_contacts" on psp_contacts for all using (true) with check (true);
+create policy "service_psp_sites" on psp_sites for all using (true) with check (true);
+
+-- Foreign keys on orders (nullable for existing orders)
+alter table psp_orders add column if not exists contact_id uuid references psp_contacts(id);
+alter table psp_orders add column if not exists site_id uuid references psp_sites(id);
+create index if not exists idx_psp_orders_contact_id on psp_orders(contact_id);
+create index if not exists idx_psp_orders_site_id on psp_orders(site_id);
