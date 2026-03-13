@@ -85,9 +85,16 @@ export default function PoUploadForm({
               </svg>
             </div>
             <h1 className="text-xl font-bold mb-2" style={{ color: "#00474a" }}>PO Uploaded</h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mb-5">
               Your purchase order for <strong>{orderNumber}</strong> has been attached successfully. You can close this page.
             </p>
+            <a
+              href="/orders"
+              className="inline-block text-sm font-semibold rounded-lg transition-all"
+              style={{ color: "#3db28c", padding: "8px 20px", border: "1.5px solid #3db28c" }}
+            >
+              View Orders
+            </a>
           </>
         ) : (
           <>

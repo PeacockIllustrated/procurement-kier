@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { contactName, email, phone, siteName, siteAddress, poNumber, notes, items, contactId, siteId, purchaserName, purchaserEmail } = body;
+    const { contactName, email, phone, siteName, siteAddress, poNumber, notes, items, contactId, siteId, purchaserName, purchaserEmail, purchaserId } = body;
 
     // Validation
     if (!contactName || !email || !phone || !siteName || !siteAddress || !items?.length) {
@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
         site_id: siteId || null,
         purchaser_name: purchaserName ? String(purchaserName) : null,
         purchaser_email: purchaserEmail ? String(purchaserEmail) : null,
+        purchaser_id: purchaserId || null,
         subtotal,
         vat,
         total,
@@ -145,6 +146,8 @@ export async function POST(req: NextRequest) {
       subtotal,
       vat,
       total,
+      purchaserName: purchaserName ? String(purchaserName) : null,
+      purchaserEmail: purchaserEmail ? String(purchaserEmail) : null,
     };
 
     const siteUrl = process.env.SITE_URL || "http://localhost:3000";

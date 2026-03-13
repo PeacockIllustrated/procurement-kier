@@ -52,6 +52,8 @@ export interface OrderData {
   subtotal: number;
   vat: number;
   total: number;
+  purchaserName?: string | null;
+  purchaserEmail?: string | null;
 }
 
 /** Build CID inline attachments — Resend fetches each image via `path` */
@@ -180,6 +182,8 @@ export async function sendOrderConfirmation(order: OrderData): Promise<void> {
               <p style="font-size:13px;color:#666;margin:0">${esc(order.siteAddress)}</p>
             </div>
 
+            ${order.purchaserName ? `<div style="margin:0 0 20px"><p style="font-size:13px;color:#666;margin:0 0 4px">Purchaser: <strong style="color:#333">${esc(order.purchaserName)}</strong></p><p style="font-size:13px;color:#666;margin:0">${esc(order.purchaserEmail)}</p></div>` : ""}
+
             <table style="width:100%;border-collapse:collapse;margin:20px 0">
               <thead>
                 <tr style="background:#f5f5f5">
@@ -246,6 +250,8 @@ export async function sendTeamNotification(order: OrderData): Promise<void> {
               <p style="margin:2px 0;font-size:14px;color:#666">${esc(order.siteAddress)}</p>
             </div>
           </div>
+
+          ${order.purchaserName ? `<div style="margin-bottom:24px"><p style="font-size:12px;color:#999;text-transform:uppercase;margin:0 0 4px">Purchaser</p><p style="margin:0;font-size:14px"><strong>${esc(order.purchaserName)}</strong></p><p style="margin:2px 0;font-size:14px;color:#666">${esc(order.purchaserEmail)}</p></div>` : ""}
 
           ${order.poNumber ? `<p style="font-size:14px;color:#666;margin-bottom:16px"><strong>PO Number:</strong> ${esc(order.poNumber)}</p>` : ""}
 
@@ -317,6 +323,8 @@ export async function sendNestPORequest(order: OrderData): Promise<void> {
             </div>
           </div>
 
+          ${order.purchaserName ? `<div style="margin-bottom:24px"><p style="font-size:12px;color:#999;text-transform:uppercase;margin:0 0 4px">Purchaser</p><p style="margin:0;font-size:14px"><strong>${esc(order.purchaserName)}</strong></p><p style="margin:2px 0;font-size:14px;color:#666">${esc(order.purchaserEmail)}</p></div>` : ""}
+
           ${order.poNumber ? `<p style="font-size:14px;color:#666;margin-bottom:16px"><strong>Customer PO:</strong> ${esc(order.poNumber)}</p>` : ""}
 
           ${order.notes ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;margin-bottom:24px"><p style="margin:0;font-size:13px;color:#c2410c"><strong>Notes:</strong> ${esc(order.notes)}</p></div>` : ""}
@@ -378,6 +386,8 @@ export function buildNestPOEmailHtml(order: OrderData, siteUrl: string, raisePoU
               <p style="margin:2px 0;font-size:14px;color:#666;${wb}">${esc(order.siteAddress)}</p>
             </td>
           </tr></table>
+
+          ${order.purchaserName ? `<div style="margin-bottom:24px"><p style="font-size:12px;color:#999;text-transform:uppercase;margin:0 0 4px">Purchaser</p><p style="margin:0;font-size:14px;${wb}"><strong>${esc(order.purchaserName)}</strong></p><p style="margin:2px 0;font-size:14px;color:#666;${wb}">${esc(order.purchaserEmail)}</p></div>` : ""}
 
           ${order.poNumber ? `<p style="font-size:14px;color:#666;margin-bottom:16px;${wb}"><strong>Customer PO:</strong> ${esc(order.poNumber)}</p>` : ""}
 

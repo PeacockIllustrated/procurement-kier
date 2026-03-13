@@ -18,6 +18,12 @@ interface Site {
   address: string;
 }
 
+interface Purchaser {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export default function CheckoutPage() {
   const { items, totalPrice, clearBasket } = useBasket();
   const router = useRouter();
@@ -46,9 +52,15 @@ export default function CheckoutPage() {
   const [editSiteForm, setEditSiteForm] = useState({ name: "", address: "" });
   const [savingEdit, setSavingEdit] = useState(false);
 
-  // Purchaser (optional)
-  const [purchaserName, setPurchaserName] = useState("");
-  const [purchaserEmail, setPurchaserEmail] = useState("");
+  // Purchasers
+  const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
+  const [selectedPurchaser, setSelectedPurchaser] = useState<Purchaser | null>(null);
+  const [showNewPurchaser, setShowNewPurchaser] = useState(false);
+  const [newPurchaser, setNewPurchaser] = useState({ name: "", email: "" });
+  const [savingPurchaser, setSavingPurchaser] = useState(false);
+  const [managePurchasers, setManagePurchasers] = useState(false);
+  const [editingPurchaser, setEditingPurchaser] = useState<Purchaser | null>(null);
+  const [editPurchaserForm, setEditPurchaserForm] = useState({ name: "", email: "" });
 
   // Free-text fields
   const [poNumber, setPoNumber] = useState("");
@@ -58,6 +70,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     fetch("/api/contacts").then((r) => r.json()).then((d) => setContacts(d.contacts || [])).catch(() => {});
     fetch("/api/sites").then((r) => r.json()).then((d) => setSites(d.sites || [])).catch(() => {});
+    fetch("/api/purchasers").then((r) => r.json()).then((d) => setPurchasers(d.purchasers || [])).catch(() => {});
   }, []);
 
   if (items.length === 0) {
@@ -156,6 +169,75 @@ export default function CheckoutPage() {
     } catch { /* ignore */ }
   };
 
+  const handlePurchaserSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === "__new__") { setSelectedPurchaser(null); setShowNewPurchaser(true); return; }
+    if (val === "__manage__") { setManagePurchasers(true); e.target.value = selectedPurchaser?.id || ""; return; }
+    if (val === "__none__") { setSelectedPurchaser(null); setShowNewPurchaser(false); return; }
+    setShowNewPurchaser(false);
+    setSelectedPurchaser(purchasers.find((p) => p.id === val) || null);
+  };
+
+  const startEditPurchaser = (p: Purchaser) => {
+    setEditingPurchaser(p);
+    setEditPurchaserForm({ name: p.name, email: p.email });
+  };
+
+  const saveEditPurchaser = async () => {
+    if (!editingPurchaser) return;
+    if (!editPurchaserForm.name.trim() || !editPurchaserForm.email.trim()) { alert("All fields are required."); return; }
+    setSavingEdit(true);
+    try {
+      const res = await fetch("/api/purchasers", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editingPurchaser.id, ...editPurchaserForm }) });
+      if (res.ok) {
+        const updated: Purchaser = await res.json();
+        setPurchasers((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+        if (selectedPurchaser?.id === updated.id) setSelectedPurchaser(updated);
+        setEditingPurchaser(null);
+      }
+    } catch { /* ignore */ }
+    setSavingEdit(false);
+  };
+
+  const deletePurchaser = async (id: string) => {
+    if (!confirm("Remove this purchaser? Orders placed with this purchaser will keep their data.")) return;
+    try {
+      const res = await fetch("/api/purchasers", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      if (res.ok) {
+        setPurchasers((prev) => prev.filter((p) => p.id !== id));
+        if (selectedPurchaser?.id === id) setSelectedPurchaser(null);
+        if (editingPurchaser?.id === id) setEditingPurchaser(null);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const saveNewPurchaser = async () => {
+    if (!newPurchaser.name.trim() || !newPurchaser.email.trim()) {
+      alert("Please fill in all purchaser fields.");
+      return;
+    }
+    setSavingPurchaser(true);
+    try {
+      const res = await fetch("/api/purchasers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPurchaser),
+      });
+      if (res.ok) {
+        const saved: Purchaser = await res.json();
+        setPurchasers((prev) => {
+          const exists = prev.some((p) => p.id === saved.id);
+          const updated = exists ? prev : [...prev, saved].sort((a, b) => a.name.localeCompare(b.name));
+          return updated;
+        });
+        setSelectedPurchaser(saved);
+        setShowNewPurchaser(false);
+        setNewPurchaser({ name: "", email: "" });
+      }
+    } catch { /* ignore */ }
+    setSavingPurchaser(false);
+  };
+
   const saveNewContact = async () => {
     if (!newContact.name.trim() || !newContact.email.trim() || !newContact.phone.trim()) {
       alert("Please fill in all contact fields.");
@@ -227,8 +309,9 @@ export default function CheckoutPage() {
           siteAddress: selectedSite.address,
           contactId: selectedContact.id,
           siteId: selectedSite.id,
-          purchaserName: purchaserName.trim() || null,
-          purchaserEmail: purchaserEmail.trim() || null,
+          purchaserName: selectedPurchaser?.name || null,
+          purchaserEmail: selectedPurchaser?.email || null,
+          purchaserId: selectedPurchaser?.id || null,
           poNumber,
           notes,
           items: items.map((item) => ({
@@ -349,14 +432,39 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Purchaser (optional) */}
+          {/* Purchaser section */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <h2 className="text-base font-semibold text-persimmon-navy mb-1">Purchaser</h2>
             <p className="text-xs text-gray-400 mb-4">The person responsible for raising the purchase order (optional).</p>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <input type="text" placeholder="Name" value={purchaserName} onChange={(e) => setPurchaserName(e.target.value)} className={inputClass} />
-              <input type="email" placeholder="Email" value={purchaserEmail} onChange={(e) => setPurchaserEmail(e.target.value)} className={inputClass} />
-            </div>
+            <select value={selectedPurchaser?.id || (showNewPurchaser ? "__new__" : "__none__")} onChange={handlePurchaserSelect} className={selectClass}>
+              <option value="__none__">No purchaser</option>
+              {purchasers.map((p) => (
+                <option key={p.id} value={p.id}>{p.name} ({p.email})</option>
+              ))}
+              <option value="__new__">+ Add new purchaser</option>
+              {purchasers.length > 0 && <option value="__manage__">Manage purchasers...</option>}
+            </select>
+
+            {selectedPurchaser && !showNewPurchaser && (
+              <div className="mt-3 px-1 text-sm text-gray-500 space-y-0.5">
+                <p className="font-medium text-gray-700">{selectedPurchaser.name}</p>
+                <p>{selectedPurchaser.email}</p>
+              </div>
+            )}
+
+            {showNewPurchaser && (
+              <div className="mt-4 border-2 border-dashed border-persimmon-green rounded-xl p-4 bg-emerald-50/30">
+                <p className="text-sm font-semibold text-persimmon-navy mb-3">New Purchaser</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <input type="text" placeholder="Name *" value={newPurchaser.name} onChange={(e) => setNewPurchaser((p) => ({ ...p, name: e.target.value }))} className={inputClass} />
+                  <input type="email" placeholder="Email *" value={newPurchaser.email} onChange={(e) => setNewPurchaser((p) => ({ ...p, email: e.target.value }))} className={inputClass} />
+                </div>
+                <div className="flex justify-end gap-2 mt-3">
+                  <button type="button" onClick={() => { setShowNewPurchaser(false); setNewPurchaser({ name: "", email: "" }); }} className="px-4 py-2 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                  <button type="button" onClick={saveNewPurchaser} disabled={savingPurchaser} className="px-4 py-2 text-sm text-white bg-persimmon-green rounded-lg font-medium hover:bg-persimmon-green-dark transition disabled:opacity-50">{savingPurchaser ? "Saving..." : "Save Purchaser"}</button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* PO Number & Notes */}
@@ -537,6 +645,54 @@ export default function CheckoutPage() {
                           <div className="flex items-center gap-1.5 shrink-0 ml-3">
                             <button type="button" onClick={() => startEditSite(s)} className="px-2.5 py-1 text-xs text-persimmon-green border border-persimmon-green/30 rounded-lg hover:bg-persimmon-green/5 transition">Edit</button>
                             <button type="button" onClick={() => deleteSite(s.id)} className="px-2.5 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition">Remove</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Manage Purchasers Modal */}
+      {managePurchasers && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => { setManagePurchasers(false); setEditingPurchaser(null); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-persimmon-navy">Manage Purchasers</h2>
+              <button onClick={() => { setManagePurchasers(false); setEditingPurchaser(null); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              {purchasers.length === 0 ? (
+                <p className="text-gray-400 text-sm text-center py-8">No purchasers yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {purchasers.map((p) => (
+                    <div key={p.id}>
+                      {editingPurchaser?.id === p.id ? (
+                        <div className="border-2 border-persimmon-green rounded-xl p-4 bg-emerald-50/30">
+                          <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                            <input type="text" value={editPurchaserForm.name} onChange={(e) => setEditPurchaserForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Name" className={inputClass} />
+                            <input type="email" value={editPurchaserForm.email} onChange={(e) => setEditPurchaserForm((prev) => ({ ...prev, email: e.target.value }))} placeholder="Email" className={inputClass} />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setEditingPurchaser(null)} className="px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                            <button type="button" onClick={saveEditPurchaser} disabled={savingEdit} className="px-3 py-1.5 text-sm text-white bg-persimmon-green rounded-lg font-medium hover:bg-persimmon-green-dark transition disabled:opacity-50">{savingEdit ? "Saving..." : "Save"}</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between border border-gray-100 rounded-xl p-4 hover:border-gray-200 transition">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-persimmon-navy">{p.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{p.email}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                            <button type="button" onClick={() => startEditPurchaser(p)} className="px-2.5 py-1 text-xs text-persimmon-green border border-persimmon-green/30 rounded-lg hover:bg-persimmon-green/5 transition">Edit</button>
+                            <button type="button" onClick={() => deletePurchaser(p.id)} className="px-2.5 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition">Remove</button>
                           </div>
                         </div>
                       )}
