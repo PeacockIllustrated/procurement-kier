@@ -37,6 +37,15 @@ export default function CheckoutPage() {
   const [savingContact, setSavingContact] = useState(false);
   const [savingSite, setSavingSite] = useState(false);
 
+  // Manage modals
+  const [manageContacts, setManageContacts] = useState(false);
+  const [manageSites, setManageSites] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [editingSite, setEditingSite] = useState<Site | null>(null);
+  const [editContactForm, setEditContactForm] = useState({ name: "", email: "", phone: "" });
+  const [editSiteForm, setEditSiteForm] = useState({ name: "", address: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
+
   // Free-text fields
   const [poNumber, setPoNumber] = useState("");
   const [notes, setNotes] = useState("");
@@ -63,26 +72,84 @@ export default function CheckoutPage() {
 
   const handleContactSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
-    if (val === "__new__") {
-      setSelectedContact(null);
-      setShowNewContact(true);
-      return;
-    }
+    if (val === "__new__") { setSelectedContact(null); setShowNewContact(true); return; }
+    if (val === "__manage__") { setManageContacts(true); e.target.value = selectedContact?.id || ""; return; }
     setShowNewContact(false);
-    const contact = contacts.find((c) => c.id === val) || null;
-    setSelectedContact(contact);
+    setSelectedContact(contacts.find((c) => c.id === val) || null);
   };
 
   const handleSiteSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
-    if (val === "__new__") {
-      setSelectedSite(null);
-      setShowNewSite(true);
-      return;
-    }
+    if (val === "__new__") { setSelectedSite(null); setShowNewSite(true); return; }
+    if (val === "__manage__") { setManageSites(true); e.target.value = selectedSite?.id || ""; return; }
     setShowNewSite(false);
-    const site = sites.find((s) => s.id === val) || null;
-    setSelectedSite(site);
+    setSelectedSite(sites.find((s) => s.id === val) || null);
+  };
+
+  const startEditContact = (c: Contact) => {
+    setEditingContact(c);
+    setEditContactForm({ name: c.name, email: c.email, phone: c.phone });
+  };
+
+  const saveEditContact = async () => {
+    if (!editingContact) return;
+    if (!editContactForm.name.trim() || !editContactForm.email.trim() || !editContactForm.phone.trim()) { alert("All fields are required."); return; }
+    setSavingEdit(true);
+    try {
+      const res = await fetch("/api/contacts", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editingContact.id, ...editContactForm }) });
+      if (res.ok) {
+        const updated: Contact = await res.json();
+        setContacts((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+        if (selectedContact?.id === updated.id) setSelectedContact(updated);
+        setEditingContact(null);
+      }
+    } catch { /* ignore */ }
+    setSavingEdit(false);
+  };
+
+  const deleteContact = async (id: string) => {
+    if (!confirm("Remove this contact? Orders placed with this contact will keep their data.")) return;
+    try {
+      const res = await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      if (res.ok) {
+        setContacts((prev) => prev.filter((c) => c.id !== id));
+        if (selectedContact?.id === id) setSelectedContact(null);
+        if (editingContact?.id === id) setEditingContact(null);
+      }
+    } catch { /* ignore */ }
+  };
+
+  const startEditSite = (s: Site) => {
+    setEditingSite(s);
+    setEditSiteForm({ name: s.name, address: s.address });
+  };
+
+  const saveEditSite = async () => {
+    if (!editingSite) return;
+    if (!editSiteForm.name.trim() || !editSiteForm.address.trim()) { alert("All fields are required."); return; }
+    setSavingEdit(true);
+    try {
+      const res = await fetch("/api/sites", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editingSite.id, ...editSiteForm }) });
+      if (res.ok) {
+        const updated: Site = await res.json();
+        setSites((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+        if (selectedSite?.id === updated.id) setSelectedSite(updated);
+        setEditingSite(null);
+      }
+    } catch { /* ignore */ }
+    setSavingEdit(false);
+  };
+
+  const deleteSite = async (id: string) => {
+    if (!confirm("Remove this site? Orders placed with this site will keep their data.")) return;
+    try {
+      const res = await fetch("/api/sites", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      if (res.ok) {
+        setSites((prev) => prev.filter((s) => s.id !== id));
+        if (selectedSite?.id === id) setSelectedSite(null);
+        if (editingSite?.id === id) setEditingSite(null);
+      }
+    } catch { /* ignore */ }
   };
 
   const saveNewContact = async () => {
@@ -215,6 +282,7 @@ export default function CheckoutPage() {
                 <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
               ))}
               <option value="__new__">+ Add new contact</option>
+              {contacts.length > 0 && <option value="__manage__">Manage contacts...</option>}
             </select>
 
             {selectedContact && !showNewContact && (
@@ -250,6 +318,7 @@ export default function CheckoutPage() {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
               <option value="__new__">+ Add new site</option>
+              {sites.length > 0 && <option value="__manage__">Manage sites...</option>}
             </select>
 
             {selectedSite && !showNewSite && (
@@ -364,6 +433,105 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
+
+      {/* Manage Contacts Modal */}
+      {manageContacts && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => { setManageContacts(false); setEditingContact(null); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-persimmon-navy">Manage Contacts</h2>
+              <button onClick={() => { setManageContacts(false); setEditingContact(null); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              {contacts.length === 0 ? (
+                <p className="text-gray-400 text-sm text-center py-8">No contacts yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {contacts.map((c) => (
+                    <div key={c.id}>
+                      {editingContact?.id === c.id ? (
+                        <div className="border-2 border-persimmon-green rounded-xl p-4 bg-emerald-50/30">
+                          <div className="grid sm:grid-cols-3 gap-3 mb-3">
+                            <input type="text" value={editContactForm.name} onChange={(e) => setEditContactForm((p) => ({ ...p, name: e.target.value }))} placeholder="Name" className={inputClass} />
+                            <input type="email" value={editContactForm.email} onChange={(e) => setEditContactForm((p) => ({ ...p, email: e.target.value }))} placeholder="Email" className={inputClass} />
+                            <input type="tel" value={editContactForm.phone} onChange={(e) => setEditContactForm((p) => ({ ...p, phone: e.target.value }))} placeholder="Phone" className={inputClass} />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setEditingContact(null)} className="px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                            <button type="button" onClick={saveEditContact} disabled={savingEdit} className="px-3 py-1.5 text-sm text-white bg-persimmon-green rounded-lg font-medium hover:bg-persimmon-green-dark transition disabled:opacity-50">{savingEdit ? "Saving..." : "Save"}</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between border border-gray-100 rounded-xl p-4 hover:border-gray-200 transition">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-persimmon-navy">{c.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{c.email} · {c.phone}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                            <button type="button" onClick={() => startEditContact(c)} className="px-2.5 py-1 text-xs text-persimmon-green border border-persimmon-green/30 rounded-lg hover:bg-persimmon-green/5 transition">Edit</button>
+                            <button type="button" onClick={() => deleteContact(c.id)} className="px-2.5 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition">Remove</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manage Sites Modal */}
+      {manageSites && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => { setManageSites(false); setEditingSite(null); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-persimmon-navy">Manage Sites</h2>
+              <button onClick={() => { setManageSites(false); setEditingSite(null); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition text-gray-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              {sites.length === 0 ? (
+                <p className="text-gray-400 text-sm text-center py-8">No sites yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {sites.map((s) => (
+                    <div key={s.id}>
+                      {editingSite?.id === s.id ? (
+                        <div className="border-2 border-persimmon-green rounded-xl p-4 bg-emerald-50/30">
+                          <div className="space-y-3 mb-3">
+                            <input type="text" value={editSiteForm.name} onChange={(e) => setEditSiteForm((p) => ({ ...p, name: e.target.value }))} placeholder="Site Name" className={inputClass} />
+                            <textarea value={editSiteForm.address} onChange={(e) => setEditSiteForm((p) => ({ ...p, address: e.target.value }))} placeholder="Site Address" rows={2} className={inputClass} />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setEditingSite(null)} className="px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                            <button type="button" onClick={saveEditSite} disabled={savingEdit} className="px-3 py-1.5 text-sm text-white bg-persimmon-green rounded-lg font-medium hover:bg-persimmon-green-dark transition disabled:opacity-50">{savingEdit ? "Saving..." : "Save"}</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between border border-gray-100 rounded-xl p-4 hover:border-gray-200 transition">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-persimmon-navy">{s.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{s.address}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                            <button type="button" onClick={() => startEditSite(s)} className="px-2.5 py-1 text-xs text-persimmon-green border border-persimmon-green/30 rounded-lg hover:bg-persimmon-green/5 transition">Edit</button>
+                            <button type="button" onClick={() => deleteSite(s.id)} className="px-2.5 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition">Remove</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
