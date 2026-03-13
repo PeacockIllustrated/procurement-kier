@@ -42,21 +42,24 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <Image src="/assets/persimmon_icon.svg" alt="Persimmon" width={64} height={64} className="mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-persimmon-navy">
-            {mode === "admin" ? "Admin Login" : "Persimmon Signage Portal"}
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            {mode === "admin" ? "Onesign order management" : "Enter your password to continue"}
+    <div className="min-h-screen flex items-center justify-center px-4 relative z-10">
+      <div className="w-full max-w-sm" style={{ animation: "slide-up 0.5s ease-out" }}>
+        {/* Brand mark */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-5 shadow-sm" style={{ background: "linear-gradient(135deg, var(--persimmon-green) 0%, var(--persimmon-green-dark) 100%)" }}>
+            <Image src="/assets/persimmon_icon.svg" alt="Persimmon" width={44} height={44} className="brightness-0 invert" />
+          </div>
+          <div className="flex justify-center mb-3">
+            <Image src="/assets/persimmon_wordmark.svg" alt="Persimmon" width={160} height={24} className="h-5 w-auto" />
+          </div>
+          <p className="text-sm text-gray-400 mt-2 tracking-wide">
+            {mode === "admin" ? "Order management" : "Signage Portal"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600 mb-1.5">
+        <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <div className="mb-5">
+            <label htmlFor="password" className="block text-xs font-semibold text-persimmon-navy/60 uppercase tracking-wider mb-2">
               Password
             </label>
             <input
@@ -66,8 +69,8 @@ function LoginForm() {
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-persimmon-green/15 focus:border-persimmon-green outline-none transition"
-              placeholder="Enter password"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-persimmon-green/15 focus:border-persimmon-green outline-none transition bg-white"
+              placeholder="Enter your password"
             />
           </div>
 
@@ -78,11 +81,16 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-persimmon-green text-white py-2.5 rounded-xl font-medium hover:bg-persimmon-green-dark transition disabled:opacity-50 active:scale-[0.98]"
+            className="w-full text-white py-3 rounded-xl font-medium transition disabled:opacity-50 active:scale-[0.98] shadow-sm"
+            style={{ background: loading ? "var(--persimmon-green)" : "linear-gradient(135deg, var(--persimmon-green) 0%, var(--persimmon-green-dark) 100%)" }}
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <p className="text-center text-[11px] text-gray-300 mt-6 tracking-wide">
+          Persimmon Fulfillment
+        </p>
       </div>
     </div>
   );

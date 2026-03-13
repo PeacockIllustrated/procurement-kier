@@ -188,19 +188,35 @@ export default function CustomSignPage() {
         </span>
       </div>
 
-      <h1 className="text-2xl font-bold text-persimmon-navy mb-2">
-        Request a Custom Sign
-      </h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Tell us what you need and we&apos;ll produce it to your specification.
-        Pricing will be confirmed after review.
-      </p>
+      {/* Branded hero header */}
+      <div className="rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden" style={{ background: "linear-gradient(135deg, var(--persimmon-navy) 0%, var(--persimmon-navy-light) 50%, var(--persimmon-green-dark) 100%)" }}>
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-persimmon-green-light" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+            </div>
+            <span className="text-persimmon-green-light text-xs font-semibold uppercase tracking-wider">Custom Design</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            Request a Custom Sign
+          </h1>
+          <p className="text-white/50 text-sm max-w-lg">
+            Tell us what you need and we&apos;ll produce it to your specification.
+            Pricing will be confirmed after review.
+          </p>
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-5 gap-8">
         {/* Form - 3 cols */}
         <div className="lg:col-span-3 space-y-6">
           {/* Sign Type & Shape */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: "linear-gradient(90deg, var(--persimmon-green), var(--persimmon-green-light), transparent)" }} />
             <h2 className="text-base font-semibold text-persimmon-navy mb-5">
               Sign Specification
             </h2>
@@ -261,7 +277,8 @@ export default function CustomSignPage() {
           </div>
 
           {/* Size & Material */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: "linear-gradient(90deg, var(--persimmon-green-dark), var(--persimmon-green), transparent)" }} />
             <h2 className="text-base font-semibold text-persimmon-navy mb-5">
               Size & Material
             </h2>
@@ -326,7 +343,8 @@ export default function CustomSignPage() {
           </div>
 
           {/* Additional Notes */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: "linear-gradient(90deg, var(--persimmon-navy), var(--persimmon-navy-light), transparent)" }} />
             <h2 className="text-base font-semibold text-persimmon-navy mb-5">
               Additional Notes
             </h2>
@@ -343,8 +361,10 @@ export default function CustomSignPage() {
 
         {/* Preview - 2 cols on desktop, full width on mobile */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 lg:sticky lg:top-24">
-            <h2 className="text-base font-semibold text-persimmon-navy mb-5">
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 lg:sticky lg:top-24 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[3px]" style={{ background: "linear-gradient(90deg, var(--persimmon-green), var(--persimmon-green-dark))" }} />
+            <h2 className="text-base font-semibold text-persimmon-navy mb-5 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-persimmon-green animate-pulse" />
               Preview
             </h2>
 
@@ -401,9 +421,10 @@ export default function CustomSignPage() {
               type="button"
               onClick={handleAddToBasket}
               disabled={!form.textContent.trim() || added}
-              className="w-full bg-persimmon-green text-white py-3 rounded-xl font-medium hover:bg-persimmon-green-dark transition disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+              className="w-full text-white py-3 rounded-xl font-medium transition disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-sm"
+              style={{ background: added ? "var(--persimmon-green)" : "linear-gradient(135deg, var(--persimmon-green) 0%, var(--persimmon-green-dark) 100%)" }}
             >
-              {added ? "✓ Added to Basket" : "Add to Basket — Quote on Request"}
+              {added ? "Added to Basket" : "Add to Basket — Quote on Request"}
             </button>
 
             {added && (
