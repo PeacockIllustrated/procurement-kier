@@ -97,8 +97,8 @@ export default function OrdersPage() {
 
   const filteredOrders = useMemo(() => {
     let result = orders;
-    if (selectedContactId) result = result.filter((o) => o.contactId === selectedContactId || !o.contactId);
-    if (selectedSiteId) result = result.filter((o) => o.siteId === selectedSiteId || !o.siteId);
+    if (selectedContactId) result = result.filter((o) => o.contactId === selectedContactId);
+    if (selectedSiteId) result = result.filter((o) => o.siteId === selectedSiteId);
     if (filter !== "all") result = result.filter((o) => o.status === filter);
     if (search.trim()) {
       const q = search.toLowerCase();
