@@ -1,0 +1,17 @@
+{
+  "updatedAt": "2026-03-18",
+  "description": "Product base codes with production-ready artwork. Used by order list PDF to show artwork status.",
+  "codes": [
+    "PCF105",
+    "PCF151",
+    "PCF153",
+    "PCF167",
+    "PCF384",
+    "PCF40",
+    "PCF72",
+    "PCF970",
+    "PCF971",
+    "PCFA107",
+    "PCFCCS18"
+  ]
+}

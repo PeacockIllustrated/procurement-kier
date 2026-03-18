@@ -1,4 +1,5 @@
 import { generateRaisePoToken } from "@/lib/email";
+import { isAdminAuthed } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import PoUploadForm from "./PoUploadForm";
 
@@ -13,7 +14,13 @@ export default async function PoUploadPage({
   const { t, raised } = await searchParams;
 
   const expected = generateRaisePoToken(orderNumber);
-  if (!t || t !== expected) notFound();
+  const tokenValid = t && t === expected;
+  const admin = await isAdminAuthed();
 
-  return <PoUploadForm orderNumber={orderNumber} token={t} justRaised={raised === "true"} />;
+  if (!tokenValid && !admin) notFound();
+
+  // Use real token if available, otherwise generate one for the upload API call
+  const token = tokenValid ? t : expected;
+
+  return <PoUploadForm orderNumber={orderNumber} token={token} justRaised={raised === "true"} />;
 }

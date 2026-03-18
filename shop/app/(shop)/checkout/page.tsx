@@ -85,7 +85,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const canSubmit = selectedContact && selectedSite && !submitting;
+  const canSubmit = selectedContact && selectedSite && selectedPurchaser && !submitting;
 
   const handleContactSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
@@ -173,7 +173,6 @@ export default function CheckoutPage() {
     const val = e.target.value;
     if (val === "__new__") { setSelectedPurchaser(null); setShowNewPurchaser(true); return; }
     if (val === "__manage__") { setManagePurchasers(true); e.target.value = selectedPurchaser?.id || ""; return; }
-    if (val === "__none__") { setSelectedPurchaser(null); setShowNewPurchaser(false); return; }
     setShowNewPurchaser(false);
     setSelectedPurchaser(purchasers.find((p) => p.id === val) || null);
   };
@@ -309,9 +308,9 @@ export default function CheckoutPage() {
           siteAddress: selectedSite.address,
           contactId: selectedContact.id,
           siteId: selectedSite.id,
-          purchaserName: selectedPurchaser?.name || null,
-          purchaserEmail: selectedPurchaser?.email || null,
-          purchaserId: selectedPurchaser?.id || null,
+          purchaserName: selectedPurchaser!.name,
+          purchaserEmail: selectedPurchaser!.email,
+          purchaserId: selectedPurchaser!.id,
           poNumber,
           notes,
           items: items.map((item) => ({
@@ -364,7 +363,7 @@ export default function CheckoutPage() {
 
           {/* Contact section */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-semibold text-persimmon-navy mb-5">Contact Details</h2>
+            <h2 className="text-base font-semibold text-persimmon-navy mb-5">Contact Details <span className="text-red-400">*</span></h2>
             <select value={selectedContact?.id || (showNewContact ? "__new__" : "")} onChange={handleContactSelect} className={selectClass}>
               <option value="" disabled>Select a contact...</option>
               {contacts.map((c) => (
@@ -400,7 +399,7 @@ export default function CheckoutPage() {
 
           {/* Site section */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-semibold text-persimmon-navy mb-5">Site Details</h2>
+            <h2 className="text-base font-semibold text-persimmon-navy mb-5">Site Details <span className="text-red-400">*</span></h2>
             <select value={selectedSite?.id || (showNewSite ? "__new__" : "")} onChange={handleSiteSelect} className={selectClass}>
               <option value="" disabled>Select a site...</option>
               {sites.map((s) => (
@@ -434,10 +433,10 @@ export default function CheckoutPage() {
 
           {/* Purchaser section */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-semibold text-persimmon-navy mb-1">Purchaser</h2>
-            <p className="text-xs text-gray-400 mb-4">The person responsible for raising the purchase order (optional).</p>
-            <select value={selectedPurchaser?.id || (showNewPurchaser ? "__new__" : "__none__")} onChange={handlePurchaserSelect} className={selectClass}>
-              <option value="__none__">No purchaser</option>
+            <h2 className="text-base font-semibold text-persimmon-navy mb-1">Purchaser <span className="text-red-400">*</span></h2>
+            <p className="text-xs text-gray-400 mb-4">The person responsible for raising the purchase order.</p>
+            <select value={selectedPurchaser?.id || (showNewPurchaser ? "__new__" : "")} onChange={handlePurchaserSelect} className={selectClass}>
+              <option value="" disabled>Select a purchaser...</option>
               {purchasers.map((p) => (
                 <option key={p.id} value={p.id}>{p.name} ({p.email})</option>
               ))}

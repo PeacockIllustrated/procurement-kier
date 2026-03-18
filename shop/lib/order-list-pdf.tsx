@@ -145,9 +145,10 @@ const s = StyleSheet.create({
   tableRowAlt: { backgroundColor: "#fafafa" },
   colImage: { width: 44, paddingRight: 4 },
   colProduct: { flex: 1, paddingRight: 8 },
-  colMaterial: { width: 70, paddingRight: 8 },
-  colQty: { width: 40, textAlign: "center" },
-  colCheck: { width: 32, textAlign: "center" },
+  colMaterial: { width: 65, paddingRight: 6 },
+  colArtwork: { width: 42, textAlign: "center" },
+  colQty: { width: 36, textAlign: "center" },
+  colCheck: { width: 28, textAlign: "center" },
   productImage: {
     width: 34,
     height: 34,
@@ -161,6 +162,18 @@ const s = StyleSheet.create({
   customFieldValue: { color: C.grey },
   materialText: { fontSize: 9, color: C.grey },
   qtyText: { fontSize: 11, textAlign: "center", fontFamily: "Helvetica-Bold" },
+  artworkYes: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: C.green,
+    textAlign: "center",
+  },
+  artworkNo: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: "#d97706",
+    textAlign: "center",
+  },
   checkBox: {
     width: 14,
     height: 14,
@@ -354,7 +367,7 @@ function groupItemsBySize(items: OrderItem[]): { standard: GroupedItems[]; custo
 /* ------------------------------------------------------------------ */
 /*  Item row components                                                */
 /* ------------------------------------------------------------------ */
-function StandardItemRow({ item, images, index }: { item: OrderItem; images: ImageMap; index: number }) {
+function StandardItemRow({ item, images, index, hasArtwork }: { item: OrderItem; images: ImageMap; index: number; hasArtwork: boolean }) {
   const imgCode = (item.base_code || item.code.replace(/\/.*$/, "")).replace(/\//g, "_");
   const imgUri = images[imgCode];
   const customFields = item.custom_data?.fields as Array<{ label: string; key: string; value: string }> | undefined;
@@ -378,6 +391,11 @@ function StandardItemRow({ item, images, index }: { item: OrderItem; images: Ima
         ))}
       </View>
       <View style={s.colMaterial}><Text style={s.materialText}>{item.material || "—"}</Text></View>
+      <View style={s.colArtwork}>
+        <Text style={hasArtwork ? s.artworkYes : s.artworkNo}>
+          {hasArtwork ? "\u2713 Yes" : "\u2717 No"}
+        </Text>
+      </View>
       <View style={s.colQty}><Text style={s.qtyText}>{item.quantity}</Text></View>
       <View style={s.colCheck}><View style={s.checkBox} /></View>
     </View>
@@ -403,6 +421,9 @@ function CustomSignRow({ item, index }: { item: OrderItem; index: number }) {
         {cd.additionalNotes ? <Text style={s.customSignNotes}>Notes: {cd.additionalNotes}</Text> : null}
       </View>
       <View style={s.colMaterial}><Text style={s.materialText}>Custom</Text></View>
+      <View style={s.colArtwork}>
+        <Text style={s.artworkNo}>N/A</Text>
+      </View>
       <View style={s.colQty}><Text style={s.qtyText}>{item.quantity}</Text></View>
       <View style={s.colCheck}><View style={s.checkBox} /></View>
     </View>
@@ -412,7 +433,7 @@ function CustomSignRow({ item, index }: { item: OrderItem; index: number }) {
 /* ------------------------------------------------------------------ */
 /*  Main Document                                                      */
 /* ------------------------------------------------------------------ */
-function OrderListDocument({ order, images }: { order: OrderData; images: ImageMap }) {
+function OrderListDocument({ order, images, artworkCodes }: { order: OrderData; images: ImageMap; artworkCodes: Set<string> }) {
   const orderDate = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const { standard, custom } = groupItemsBySize(order.items);
   const totalItems = order.items.reduce((sum, i) => sum + i.quantity, 0);
@@ -478,12 +499,14 @@ function OrderListDocument({ order, images }: { order: OrderData; images: ImageM
                 <View style={s.colImage} />
                 <View style={s.colProduct}><Text style={s.tableHeaderText}>Product</Text></View>
                 <View style={s.colMaterial}><Text style={s.tableHeaderText}>Material</Text></View>
+                <View style={s.colArtwork}><Text style={[s.tableHeaderText, { textAlign: "center" }]}>Artwork</Text></View>
                 <View style={s.colQty}><Text style={[s.tableHeaderText, { textAlign: "center" }]}>Qty</Text></View>
                 <View style={s.colCheck}><Text style={[s.tableHeaderText, { textAlign: "center" }]}>{"\u2713"}</Text></View>
               </View>
-              {group.items.map((item, i) => (
-                <StandardItemRow key={i} item={item} images={images} index={i} />
-              ))}
+              {group.items.map((item, i) => {
+                const baseCode = (item.base_code || item.code.replace(/\/.*$/, "")).replace(/\//g, "_");
+                return <StandardItemRow key={i} item={item} images={images} index={i} hasArtwork={artworkCodes.has(baseCode)} />;
+              })}
             </View>
           ))}
 
@@ -498,6 +521,7 @@ function OrderListDocument({ order, images }: { order: OrderData; images: ImageM
                 <View style={s.colImage} />
                 <View style={s.colProduct}><Text style={s.tableHeaderText}>Details</Text></View>
                 <View style={s.colMaterial}><Text style={s.tableHeaderText}>Type</Text></View>
+                <View style={s.colArtwork}><Text style={[s.tableHeaderText, { textAlign: "center" }]}>Artwork</Text></View>
                 <View style={s.colQty}><Text style={[s.tableHeaderText, { textAlign: "center" }]}>Qty</Text></View>
                 <View style={s.colCheck}><Text style={[s.tableHeaderText, { textAlign: "center" }]}>{"\u2713"}</Text></View>
               </View>
@@ -568,6 +592,20 @@ function OrderListDocument({ order, images }: { order: OrderData; images: ImageM
 export async function generateOrderListPdf(order: OrderData): Promise<string> {
   const siteUrl = process.env.SITE_URL || "http://localhost:3000";
   const images = await buildImageMap(order.items, siteUrl);
-  const buffer = await renderToBuffer(<OrderListDocument order={order} images={images} />);
+
+  // Load artwork registry
+  let artworkCodes = new Set<string>();
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const registryPath = path.join(process.cwd(), "data", "artwork-registry.json");
+    const raw = fs.readFileSync(registryPath, "utf-8");
+    const registry = JSON.parse(raw);
+    artworkCodes = new Set(registry.codes || []);
+  } catch {
+    // Registry missing or malformed — all items show as "No"
+  }
+
+  const buffer = await renderToBuffer(<OrderListDocument order={order} images={images} artworkCodes={artworkCodes} />);
   return Buffer.from(buffer).toString("base64");
 }
