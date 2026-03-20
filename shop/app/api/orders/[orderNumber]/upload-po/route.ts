@@ -38,13 +38,26 @@ export async function POST(
     const arrayBuffer = await file.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString("base64");
 
+    // Fetch current status so we only transition awaiting_po → new
+    const { data: current } = await supabase
+      .from("psp_orders")
+      .select("status")
+      .eq("order_number", orderNumber)
+      .single();
+
+    const updates: Record<string, string> = {
+      po_document_name: file.name,
+      po_document_data: base64,
+      po_document_type: file.type,
+    };
+
+    if (current?.status === "awaiting_po") {
+      updates.status = "new";
+    }
+
     const { error } = await supabase
       .from("psp_orders")
-      .update({
-        po_document_name: file.name,
-        po_document_data: base64,
-        po_document_type: file.type,
-      })
+      .update(updates)
       .eq("order_number", orderNumber);
 
     if (error) {
