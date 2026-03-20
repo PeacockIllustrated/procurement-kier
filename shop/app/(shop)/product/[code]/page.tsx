@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getProductByCode, getCategories } from "@/lib/catalog";
 import { notFound } from "next/navigation";
 import AddToBasketButton from "@/components/AddToBasketButton";
+import CustomSizeSection from "@/components/CustomSizeSection";
+import { productHasSizedVariants } from "@/lib/custom-size-pricing";
 
 export function generateStaticParams() {
   const params: { code: string }[] = [];
@@ -113,6 +115,10 @@ export default async function ProductPage({
               </div>
             ))}
           </div>
+
+            {productHasSizedVariants(product) && (
+              <CustomSizeSection product={product} category={category} />
+            )}
         </div>
       </div>
     </div>
