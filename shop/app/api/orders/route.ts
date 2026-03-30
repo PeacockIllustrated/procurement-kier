@@ -256,6 +256,29 @@ export async function GET() {
       for (const o of stuckOrders) o.status = "new";
     }
 
+    // Fix any orders with incorrect delivery fee (e.g. created before delivery fee feature)
+    const wrongDeliveryOrders = orders.filter((o) => {
+      const expected = calculateDeliveryFee(Number(o.subtotal));
+      return Number(o.delivery_fee || 0) !== expected;
+    });
+    if (wrongDeliveryOrders.length > 0) {
+      await Promise.all(
+        wrongDeliveryOrders.map((o) => {
+          const subtotal = Number(o.subtotal);
+          const deliveryFee = calculateDeliveryFee(subtotal);
+          const vat = Math.round((subtotal + deliveryFee) * 20) / 100;
+          const total = Math.round((subtotal + deliveryFee + vat) * 100) / 100;
+          o.delivery_fee = deliveryFee;
+          o.vat = vat;
+          o.total = total;
+          return supabase
+            .from("psp_orders")
+            .update({ delivery_fee: deliveryFee, vat, total })
+            .eq("id", o.id);
+        })
+      );
+    }
+
     // Fetch items for all orders
     const orderIds = orders.map((o) => o.id);
     const { data: allItems } = await supabase
