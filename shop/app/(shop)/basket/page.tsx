@@ -123,7 +123,37 @@ export default function BasketPage() {
         ))}
       </div>
 
-      <div className="mt-8 bg-white rounded-2xl border border-gray-100 p-6">
+      {/* Free delivery nudge */}
+      {deliveryFee > 0 && (() => {
+        const remaining = Math.ceil((100 - totalPrice) * 100) / 100;
+        return (
+          <div className="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+            <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-amber-800">
+                Spend {"\u00A3"}{remaining.toFixed(2)} more to get free delivery!
+              </p>
+              <p className="text-xs text-amber-600 mt-0.5">Free delivery on all orders over {"\u00A3"}100.</p>
+              <Link href="/" className="inline-block mt-2 text-xs font-semibold text-persimmon-green hover:underline">
+                Continue shopping &rarr;
+              </Link>
+            </div>
+          </div>
+        );
+      })()}
+
+      {deliveryFee === 0 && (
+        <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+          <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <p className="text-sm font-medium text-emerald-700">Your order qualifies for free delivery!</p>
+        </div>
+      )}
+
+      <div className="mt-4 bg-white rounded-2xl border border-gray-100 p-6">
         <div className="flex justify-between items-center mb-3">
           <span className="text-gray-500">Subtotal (ex. VAT)</span>
           <span className="text-xl font-bold text-persimmon-navy">
@@ -138,9 +168,6 @@ export default function BasketPage() {
             <span className="text-persimmon-green font-medium">FREE</span>
           )}
         </div>
-        {deliveryFee > 0 && (
-          <p className="text-[11px] text-gray-400 mb-3">Free delivery on orders over {"\u00A3"}100</p>
-        )}
         <div className="flex justify-between items-center mb-4 text-sm text-gray-400">
           <span>VAT (20%)</span>
           <span>{"\u00A3"}{((totalPrice + deliveryFee) * 0.2).toFixed(2)}</span>
