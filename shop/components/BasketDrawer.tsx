@@ -6,7 +6,7 @@ import { useBasket } from "./BasketContext";
 import { useEffect } from "react";
 
 export default function BasketDrawer() {
-  const { items, updateQuantity, removeItem, totalPrice, totalItems, drawerOpen, setDrawerOpen } = useBasket();
+  const { items, updateQuantity, removeItem, totalPrice, deliveryFee, totalItems, drawerOpen, setDrawerOpen } = useBasket();
 
   useEffect(() => {
     if (drawerOpen) {
@@ -125,17 +125,44 @@ export default function BasketDrawer() {
             </div>
 
             <div className="border-t border-gray-100 px-6 py-4 space-y-3 bg-white">
+              {deliveryFee > 0 && (
+                <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                  </svg>
+                  <p className="text-xs text-amber-800">
+                    <span className="font-medium">Spend {"\u00A3"}{(Math.ceil((100 - totalPrice) * 100) / 100).toFixed(2)} more for free delivery.</span>
+                    {" "}Orders over {"\u00A3"}100 qualify.
+                  </p>
+                </div>
+              )}
+              {deliveryFee === 0 && (
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-xs font-medium text-emerald-700">Free delivery!</p>
+                </div>
+              )}
               <div className="flex justify-between text-sm text-gray-500">
                 <span>Subtotal (ex. VAT)</span>
                 <span>{"\u00A3"}{totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
+                <span>Delivery</span>
+                {deliveryFee > 0 ? (
+                  <span>{"\u00A3"}{deliveryFee.toFixed(2)}</span>
+                ) : (
+                  <span className="text-persimmon-green font-medium">FREE</span>
+                )}
+              </div>
+              <div className="flex justify-between text-sm text-gray-500">
                 <span>VAT (20%)</span>
-                <span>{"\u00A3"}{(totalPrice * 0.2).toFixed(2)}</span>
+                <span>{"\u00A3"}{((totalPrice + deliveryFee) * 0.2).toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-semibold text-persimmon-navy pt-2 border-t border-gray-100">
                 <span>Total</span>
-                <span>{"\u00A3"}{(totalPrice * 1.2).toFixed(2)}</span>
+                <span>{"\u00A3"}{((totalPrice + deliveryFee) * 1.2).toFixed(2)}</span>
               </div>
               {items.some((i) => i.customSign) && (
                 <p className="text-[11px] text-amber-600 leading-relaxed">
