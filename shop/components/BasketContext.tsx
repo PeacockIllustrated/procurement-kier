@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import type { CustomSizeData } from "@/lib/custom-size-pricing";
+import { calculateDeliveryFee } from "@/lib/delivery";
 
 export interface CustomSignData {
   signType: string;
@@ -39,6 +40,7 @@ interface BasketContextType {
   clearBasket: () => void;
   totalItems: number;
   totalPrice: number;
+  deliveryFee: number;
   toast: string | null;
   showToast: (message: string) => void;
   drawerOpen: boolean;
@@ -105,10 +107,11 @@ export function BasketProvider({ children }: { children: ReactNode }) {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const deliveryFee = calculateDeliveryFee(totalPrice);
 
   return (
     <BasketContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearBasket, totalItems, totalPrice, toast, showToast, drawerOpen, setDrawerOpen }}
+      value={{ items, addItem, removeItem, updateQuantity, clearBasket, totalItems, totalPrice, deliveryFee, toast, showToast, drawerOpen, setDrawerOpen }}
     >
       {children}
     </BasketContext.Provider>

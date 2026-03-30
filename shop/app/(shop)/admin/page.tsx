@@ -42,6 +42,7 @@ interface Order {
   dnDocumentName: string | null;
   items: OrderItem[];
   subtotal: number;
+  deliveryFee: number;
   vat: number;
   total: number;
 }
@@ -813,6 +814,12 @@ export default function AdminPage() {
                             <tr className="border-t border-gray-100">
                               <td colSpan={3} className="pt-2.5 text-right text-gray-500">Subtotal</td>
                               <td className="pt-2.5 text-right">{"\u00A3"}{order.subtotal.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                              <td colSpan={3} className="text-right text-gray-400 text-xs">Delivery</td>
+                              <td className="text-right text-gray-400 text-xs">
+                                {order.deliveryFee > 0 ? <>{"\u00A3"}{order.deliveryFee.toFixed(2)}</> : <span className="text-persimmon-green font-medium">FREE</span>}
+                              </td>
                             </tr>
                             <tr>
                               <td colSpan={3} className="text-right text-gray-400 text-xs">VAT</td>

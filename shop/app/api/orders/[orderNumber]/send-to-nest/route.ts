@@ -61,6 +61,7 @@ export async function POST(
         custom_data: item.custom_data || null,
       })),
       subtotal: Number(order.subtotal),
+      deliveryFee: Number(order.delivery_fee || 0),
       vat: Number(order.vat),
       total: Number(order.total),
     };
@@ -98,6 +99,7 @@ export async function POST(
         poNumber: order.po_number,
         notes: order.notes,
         subtotal: Number(order.subtotal),
+        deliveryFee: Number(order.delivery_fee || 0),
         vat: Number(order.vat),
         total: Number(order.total),
         itemCount: (items || []).length,

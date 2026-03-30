@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { sendOrderConfirmation, sendTeamNotification, buildNestPOEmailHtml, buildPurchaserPOEmailHtml, generateRaisePoToken } from "@/lib/email";
 import { isShopAuthed, isAdminAuthed } from "@/lib/auth";
+import { calculateDeliveryFee } from "@/lib/delivery";
 
 function generateOrderNumber(): string {
   const date = new Date();
@@ -92,8 +93,9 @@ export async function POST(req: NextRequest) {
     });
 
     subtotal = Math.round(subtotal * 100) / 100;
-    const vat = Math.round(subtotal * 20) / 100;
-    const total = Math.round((subtotal + vat) * 100) / 100;
+    const deliveryFee = calculateDeliveryFee(subtotal);
+    const vat = Math.round((subtotal + deliveryFee) * 20) / 100;
+    const total = Math.round((subtotal + deliveryFee + vat) * 100) / 100;
 
     const orderNumber = generateOrderNumber();
 
@@ -116,6 +118,7 @@ export async function POST(req: NextRequest) {
         purchaser_email: purchaserEmail ? String(purchaserEmail) : null,
         purchaser_id: purchaserId || null,
         subtotal,
+        delivery_fee: deliveryFee,
         vat,
         total,
       })
@@ -154,6 +157,7 @@ export async function POST(req: NextRequest) {
       notes: notes ? String(notes) : null,
       items: validatedItems,
       subtotal,
+      deliveryFee,
       vat,
       total,
       purchaserName: purchaserName ? String(purchaserName) : null,
@@ -198,6 +202,7 @@ export async function POST(req: NextRequest) {
                 poNumber: poNumber ? String(poNumber) : null,
                 notes: notes ? String(notes) : null,
                 subtotal,
+                deliveryFee,
                 vat,
                 total,
                 itemCount: validatedItems.length,
@@ -285,6 +290,7 @@ export async function GET() {
           customData: item.custom_data || null,
         })),
       subtotal: Number(o.subtotal),
+      deliveryFee: Number(o.delivery_fee || 0),
       vat: Number(o.vat),
       total: Number(o.total),
     }));

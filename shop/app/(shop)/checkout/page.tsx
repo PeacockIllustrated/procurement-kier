@@ -25,7 +25,7 @@ interface Purchaser {
 }
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearBasket } = useBasket();
+  const { items, totalPrice, deliveryFee, clearBasket } = useBasket();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -327,8 +327,9 @@ export default function CheckoutPage() {
             ...(item.customSizeData ? { customSizeData: item.customSizeData } : {}),
           })),
           subtotal: totalPrice,
-          vat: totalPrice * 0.2,
-          total: totalPrice * 1.2,
+          deliveryFee,
+          vat: (totalPrice + deliveryFee) * 0.2,
+          total: (totalPrice + deliveryFee) * 1.2,
         }),
       });
 
@@ -522,12 +523,20 @@ export default function CheckoutPage() {
                 <span>{"\u00A3"}{totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-400">
+                <span>Delivery</span>
+                {deliveryFee > 0 ? (
+                  <span>{"\u00A3"}{deliveryFee.toFixed(2)}</span>
+                ) : (
+                  <span className="text-persimmon-green font-medium">FREE</span>
+                )}
+              </div>
+              <div className="flex justify-between text-sm text-gray-400">
                 <span>VAT (20%)</span>
-                <span>{"\u00A3"}{(totalPrice * 0.2).toFixed(2)}</span>
+                <span>{"\u00A3"}{((totalPrice + deliveryFee) * 0.2).toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-persimmon-navy pt-2 border-t border-gray-100">
                 <span>Total</span>
-                <span>{"\u00A3"}{(totalPrice * 1.2).toFixed(2)}</span>
+                <span>{"\u00A3"}{((totalPrice + deliveryFee) * 1.2).toFixed(2)}</span>
               </div>
             </div>
 

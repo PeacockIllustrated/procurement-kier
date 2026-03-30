@@ -35,6 +35,7 @@ interface Order {
   poDocumentName: string | null;
   items: OrderItem[];
   subtotal: number;
+  deliveryFee: number;
   vat: number;
   total: number;
 }
@@ -643,6 +644,18 @@ export default function OrdersPage() {
                               <td className="pt-2.5 text-right">
                                 {"\u00A3"}
                                 {order.subtotal.toFixed(2)}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan={3} className="text-right text-gray-400 text-xs">
+                                Delivery
+                              </td>
+                              <td className="text-right text-gray-400 text-xs">
+                                {order.deliveryFee > 0 ? (
+                                  <>{"\u00A3"}{order.deliveryFee.toFixed(2)}</>
+                                ) : (
+                                  <span className="text-persimmon-green font-medium">FREE</span>
+                                )}
                               </td>
                             </tr>
                             <tr>

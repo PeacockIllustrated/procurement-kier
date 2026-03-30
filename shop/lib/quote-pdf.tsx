@@ -171,6 +171,12 @@ const s = StyleSheet.create({
     width: 162,
     alignSelf: "flex-end",
   },
+  vatNote: {
+    fontSize: 8,
+    color: C.grey,
+    textAlign: "right",
+    marginTop: 2,
+  },
   customQuoteNote: {
     marginTop: 6,
     fontSize: 8,
@@ -382,14 +388,17 @@ function QuoteDocument({ order, images }: { order: OrderData; images: ImageMap }
               <Text style={s.totalsValue}>{fmt(order.subtotal)}</Text>
             </View>
             <View style={s.totalsRow}>
-              <Text style={s.totalsLabel}>VAT (20%)</Text>
-              <Text style={s.totalsValue}>{fmt(order.vat)}</Text>
+              <Text style={s.totalsLabel}>Delivery</Text>
+              <Text style={s.totalsValue}>
+                {order.deliveryFee > 0 ? fmt(order.deliveryFee) : "FREE"}
+              </Text>
             </View>
             <View style={s.totalsDivider} />
             <View style={s.totalsRow}>
               <Text style={[s.totalsLabel, s.totalsBold]}>Total</Text>
-              <Text style={[s.totalsValue, s.totalsBold]}>{fmt(order.total)}</Text>
+              <Text style={[s.totalsValue, s.totalsBold]}>{fmt(order.subtotal + order.deliveryFee)}</Text>
             </View>
+            <Text style={s.vatNote}>exc. 20% VAT</Text>
             {hasCustom && (
               <Text style={s.customQuoteNote}>* Custom sign items priced on request</Text>
             )}

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useBasket } from "@/components/BasketContext";
 
 export default function BasketPage() {
-  const { items, updateQuantity, removeItem, totalPrice } = useBasket();
+  const { items, updateQuantity, removeItem, totalPrice, deliveryFee } = useBasket();
 
   if (items.length === 0) {
     return (
@@ -130,14 +130,25 @@ export default function BasketPage() {
             {"\u00A3"}{totalPrice.toFixed(2)}
           </span>
         </div>
+        <div className="flex justify-between items-center mb-3 text-sm">
+          <span className="text-gray-500">Delivery</span>
+          {deliveryFee > 0 ? (
+            <span className="text-gray-700">{"\u00A3"}{deliveryFee.toFixed(2)}</span>
+          ) : (
+            <span className="text-persimmon-green font-medium">FREE</span>
+          )}
+        </div>
+        {deliveryFee > 0 && (
+          <p className="text-[11px] text-gray-400 mb-3">Free delivery on orders over {"\u00A3"}100</p>
+        )}
         <div className="flex justify-between items-center mb-4 text-sm text-gray-400">
           <span>VAT (20%)</span>
-          <span>{"\u00A3"}{(totalPrice * 0.2).toFixed(2)}</span>
+          <span>{"\u00A3"}{((totalPrice + deliveryFee) * 0.2).toFixed(2)}</span>
         </div>
         <div className="flex justify-between items-center mb-6 border-t border-gray-100 pt-4">
           <span className="text-lg font-bold text-persimmon-navy">Total (inc. VAT)</span>
           <span className="text-2xl font-bold text-persimmon-green">
-            {"\u00A3"}{(totalPrice * 1.2).toFixed(2)}
+            {"\u00A3"}{((totalPrice + deliveryFee) * 1.2).toFixed(2)}
           </span>
         </div>
 

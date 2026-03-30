@@ -123,6 +123,7 @@ export async function GET(
         customData: item.custom_data || null,
       })),
       subtotal: Number(order.subtotal),
+      deliveryFee: Number(order.delivery_fee || 0),
       vat: Number(order.vat),
       total: Number(order.total),
     });

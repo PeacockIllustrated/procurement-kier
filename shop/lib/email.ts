@@ -50,6 +50,7 @@ export interface OrderData {
   notes: string | null;
   items: OrderItem[];
   subtotal: number;
+  deliveryFee: number;
   vat: number;
   total: number;
   purchaserName?: string | null;
@@ -160,11 +161,15 @@ function itemRowsHtml(items: OrderItem[], siteUrl?: string): string {
     .join("");
 }
 
-function totalsHtml(subtotal: number, vat: number, total: number, hasCustomItems: boolean): string {
+function totalsHtml(subtotal: number, deliveryFee: number, vat: number, total: number, hasCustomItems: boolean): string {
   return `
     <tr>
       <td colspan="3" style="padding:8px 12px;text-align:right;font-size:14px;color:#666">Subtotal</td>
       <td style="padding:8px 12px 8px 8px;text-align:right;font-size:14px">&pound;${subtotal.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="padding:8px 12px;text-align:right;font-size:14px;color:#666">Delivery</td>
+      <td style="padding:8px 12px 8px 8px;text-align:right;font-size:14px">${deliveryFee > 0 ? `&pound;${deliveryFee.toFixed(2)}` : `<span style="color:#3db28c;font-weight:bold">FREE</span>`}</td>
     </tr>
     <tr>
       <td colspan="3" style="padding:8px 12px;text-align:right;font-size:14px;color:#666">VAT (20%)</td>
@@ -221,7 +226,7 @@ export async function sendOrderConfirmation(order: OrderData): Promise<void> {
                 ${itemRowsHtml(order.items)}
               </tbody>
               <tfoot>
-                ${totalsHtml(order.subtotal, order.vat, order.total, order.items.some(i => !!i.custom_data))}
+                ${totalsHtml(order.subtotal, order.deliveryFee, order.vat, order.total, order.items.some(i => !!i.custom_data))}
               </tfoot>
             </table>
 
@@ -292,7 +297,7 @@ export async function sendTeamNotification(order: OrderData): Promise<void> {
               ${itemRowsHtml(order.items)}
             </tbody>
             <tfoot>
-              ${totalsHtml(order.subtotal, order.vat, order.total, order.items.some(i => !!i.custom_data))}
+              ${totalsHtml(order.subtotal, order.deliveryFee, order.vat, order.total, order.items.some(i => !!i.custom_data))}
             </tfoot>
           </table>
         </div>
@@ -362,7 +367,7 @@ export async function sendNestPORequest(order: OrderData): Promise<void> {
               ${itemRowsHtml(order.items)}
             </tbody>
             <tfoot>
-              ${totalsHtml(order.subtotal, order.vat, order.total, order.items.some(i => !!i.custom_data))}
+              ${totalsHtml(order.subtotal, order.deliveryFee, order.vat, order.total, order.items.some(i => !!i.custom_data))}
             </tfoot>
           </table>
         </div>
@@ -424,7 +429,7 @@ export function buildNestPOEmailHtml(order: OrderData, siteUrl: string, raisePoU
               ${itemRowsHtml(order.items, siteUrl)}
             </tbody>
             <tfoot>
-              ${totalsHtml(order.subtotal, order.vat, order.total, order.items.some(i => !!i.custom_data))}
+              ${totalsHtml(order.subtotal, order.deliveryFee, order.vat, order.total, order.items.some(i => !!i.custom_data))}
             </tfoot>
           </table>
 
@@ -482,7 +487,7 @@ export function buildPurchaserPOEmailHtml(order: OrderData, siteUrl: string, upl
               ${itemRowsHtml(order.items, siteUrl)}
             </tbody>
             <tfoot>
-              ${totalsHtml(order.subtotal, order.vat, order.total, order.items.some(i => !!i.custom_data))}
+              ${totalsHtml(order.subtotal, order.deliveryFee, order.vat, order.total, order.items.some(i => !!i.custom_data))}
             </tfoot>
           </table>
 
