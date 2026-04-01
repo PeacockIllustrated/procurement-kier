@@ -20,25 +20,9 @@
           ],
           "name": "Site Setup Pack",
           "image": "/images/products/PA115.webp"
-        },
-        {
-          "baseCode": "PCFS118",
-          "variants": [
-            {
-              "code": "PCFS118/R",
-              "size": null,
-              "material": "Semi-rigid PVC",
-              "description": "Health and Safety on Site Sign Pack (Semi-rigid PVC)",
-              "price": 86.4,
-              "clientPrice": 68.26,
-              "sizeSuffix": "R"
-            }
-          ],
-          "name": "Health and Safety on Site Sign Pack",
-          "image": "/images/products/PCFS118.png"
         }
       ],
-      "productCount": 2
+      "productCount": 1
     },
     {
       "name": "Environmental Signs",
