@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import AdminAnalytics from "@/components/admin-analytics";
 
 interface OrderItem {
   id: string;
@@ -62,7 +63,7 @@ export default function AdminPage() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [lightbox, setLightbox] = useState<{ src: string; code: string } | null>(null);
-  const [tab, setTab] = useState<"orders" | "suggestions">("orders");
+  const [tab, setTab] = useState<"orders" | "suggestions" | "analytics">("orders");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [sugFilter, setSugFilter] = useState("all");
   const [sendingToNest, setSendingToNest] = useState<string | null>(null);
@@ -290,7 +291,7 @@ export default function AdminPage() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 mb-6 bg-gray-50 rounded-xl p-1 max-w-xs">
+      <div className="flex gap-1 mb-6 bg-gray-50 rounded-xl p-1 max-w-sm">
         <button
           onClick={() => setTab("orders")}
           className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -311,6 +312,14 @@ export default function AdminPage() {
               {suggestions.filter((s) => s.status === "new").length}
             </span>
           )}
+        </button>
+        <button
+          onClick={() => setTab("analytics")}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+            tab === "analytics" ? "bg-white text-brand-navy shadow-sm" : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          Analytics
         </button>
       </div>
 
@@ -385,6 +394,8 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+      ) : tab === "analytics" ? (
+        <AdminAnalytics />
       ) : (
       /* ─── Orders Tab ─── */
       <>
