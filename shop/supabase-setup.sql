@@ -120,3 +120,21 @@ create policy "service_{prefix}_suggestions" on {prefix}_suggestions for all usi
 create policy "service_{prefix}_contacts" on {prefix}_contacts for all using (true) with check (true);
 create policy "service_{prefix}_sites" on {prefix}_sites for all using (true) with check (true);
 create policy "service_{prefix}_purchasers" on {prefix}_purchasers for all using (true) with check (true);
+
+-- Analytics table (prospect behavior tracking)
+create table {prefix}_analytics (
+  id          uuid primary key default gen_random_uuid(),
+  session_id  text not null,
+  event_type  text not null,
+  page        text not null,
+  metadata    jsonb default '{}',
+  duration_ms integer,
+  created_at  timestamptz default now()
+);
+
+create index idx_{prefix}_analytics_created_at on {prefix}_analytics(created_at desc);
+create index idx_{prefix}_analytics_event_type on {prefix}_analytics(event_type);
+create index idx_{prefix}_analytics_session_id on {prefix}_analytics(session_id);
+
+alter table {prefix}_analytics enable row level security;
+create policy "service_{prefix}_analytics" on {prefix}_analytics for all using (true) with check (true);

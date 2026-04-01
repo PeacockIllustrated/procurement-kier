@@ -82,4 +82,5 @@ export const tables = {
   contacts: `${brand.dbPrefix}_contacts`,
   sites: `${brand.dbPrefix}_sites`,
   purchasers: `${brand.dbPrefix}_purchasers`,
+  analytics: `${brand.dbPrefix}_analytics`,
 } as const;
