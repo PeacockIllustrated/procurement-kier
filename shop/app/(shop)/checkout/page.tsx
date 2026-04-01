@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBasket } from "@/components/BasketContext";
 import Link from "next/link";
+import { useAnalytics } from "@/components/analytics-provider";
 
 interface Contact {
   id: string;
@@ -58,6 +59,12 @@ export default function CheckoutPage() {
   const [showNewPurchaser, setShowNewPurchaser] = useState(false);
   const [newPurchaser, setNewPurchaser] = useState({ name: "", email: "" });
   const [savingPurchaser, setSavingPurchaser] = useState(false);
+
+  const { track } = useAnalytics();
+
+  useEffect(() => {
+    track("checkout_start");
+  }, [track]);
   const [managePurchasers, setManagePurchasers] = useState(false);
   const [editingPurchaser, setEditingPurchaser] = useState<Purchaser | null>(null);
   const [editPurchaserForm, setEditPurchaserForm] = useState({ name: "", email: "" });

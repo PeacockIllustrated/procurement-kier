@@ -9,6 +9,7 @@ import SignPreview, {
   SIGN_TYPES,
   SIZE_DIMENSIONS,
 } from "@/components/SignPreview";
+import { useAnalytics } from "@/components/analytics-provider";
 
 const MATERIALS = [
   "4mm Correx",
@@ -107,11 +108,17 @@ export default function CustomSignPage() {
     additionalNotes: "",
   });
 
+  const { track } = useAnalytics();
+
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAddToBasket = () => {
+    track("custom_sign_interact", {
+      signType: form.signType,
+      shape: form.shape,
+    });
     const sizeInfo = SIZE_DIMENSIONS[form.size];
     const typeInfo = SIGN_TYPES[form.signType];
     const code = `CUSTOM-${Date.now()}`;

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import AddToBasketButton from "@/components/AddToBasketButton";
 import CustomSizeSection from "@/components/CustomSizeSection";
 import { productHasSizedVariants } from "@/lib/custom-size-pricing";
+import TrackEvent from "@/components/analytics-tracker";
 
 export function generateStaticParams() {
   const params: { code: string }[] = [];
@@ -30,6 +31,10 @@ export default async function ProductPage({
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
+      <TrackEvent
+        eventType="product_view"
+        metadata={{ productCode: product.baseCode, productName: product.name }}
+      />
       <div className="mb-6 flex items-center gap-2 text-sm text-gray-400">
         <Link href="/" className="hover:text-brand-primary transition">
           All Categories

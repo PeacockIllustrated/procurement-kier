@@ -2,11 +2,20 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
+import { useAnalytics } from "@/components/analytics-provider";
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("order") || "N/A";
+
+  const { track } = useAnalytics();
+
+  useEffect(() => {
+    if (orderNumber && orderNumber !== "N/A") {
+      track("order_placed", { orderNumber });
+    }
+  }, [track, orderNumber]);
 
   return (
     <div className="max-w-lg mx-auto px-4 py-20 text-center">
