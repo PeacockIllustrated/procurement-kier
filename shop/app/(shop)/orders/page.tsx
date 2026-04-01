@@ -399,8 +399,8 @@ export default function OrdersPage() {
                         <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${status.color}`}>
                           {status.label}
                         </span>
-                        <p className="text-sm font-bold text-brand-navy mt-1.5">
-                          {"\u00A3"}{order.total.toFixed(2)}
+                        <p className="mt-1.5">
+                          <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                         </p>
                         <p className="text-[11px] text-gray-400 mt-0.5">
                           {new Date(order.createdAt).toLocaleDateString("en-GB", {
@@ -628,9 +628,8 @@ export default function OrdersPage() {
                                     )}
                                   </td>
                                   <td className="py-2.5 text-center text-gray-500">{item.quantity}</td>
-                                  <td className="py-2.5 text-right font-medium">
-                                    {"\u00A3"}
-                                    {(item.price * item.quantity).toFixed(2)}
+                                  <td className="py-2.5 text-right">
+                                    <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                                   </td>
                                 </tr>
                               );
@@ -642,29 +641,23 @@ export default function OrdersPage() {
                                 Subtotal
                               </td>
                               <td className="pt-2.5 text-right">
-                                {"\u00A3"}
-                                {order.subtotal.toFixed(2)}
+                                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                               </td>
                             </tr>
                             <tr>
                               <td colSpan={3} className="text-right text-gray-400 text-xs">
                                 Delivery
                               </td>
-                              <td className="text-right text-gray-400 text-xs">
-                                {order.deliveryFee > 0 ? (
-                                  <>{"\u00A3"}{order.deliveryFee.toFixed(2)}</>
-                                ) : (
-                                  <span className="text-brand-primary font-medium">FREE</span>
-                                )}
+                              <td className="text-right">
+                                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                               </td>
                             </tr>
                             <tr>
                               <td colSpan={3} className="text-right text-gray-400 text-xs">
                                 VAT (20%)
                               </td>
-                              <td className="text-right text-gray-400 text-xs">
-                                {"\u00A3"}
-                                {order.vat.toFixed(2)}
+                              <td className="text-right">
+                                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                               </td>
                             </tr>
                             <tr className="font-bold text-brand-navy">
@@ -672,8 +665,7 @@ export default function OrdersPage() {
                                 Total
                               </td>
                               <td className="pt-2 text-right">
-                                {"\u00A3"}
-                                {order.total.toFixed(2)}
+                                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span>
                               </td>
                             </tr>
                           </tfoot>

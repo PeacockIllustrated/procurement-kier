@@ -221,19 +221,8 @@ export default function CustomSizeSection({ product, category }: Props) {
                     </p>
                   ) : (
                     <>
-                      <p className="text-2xl font-bold text-brand-navy mt-1">
-                        {"\u00A3"}
-                        {result.matchedVariant!.price.toFixed(2)}
-                      </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">
-                        ex. VAT &middot; priced as{" "}
-                        {result.matchedVariant!.size}
-                        {result.matchedFromProduct && (
-                          <span>
-                            {" "}
-                            (from {result.matchedFromProduct})
-                          </span>
-                        )}
+                      <p className="mt-1">
+                        <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2.5 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span>
                       </p>
                     </>
                   )}

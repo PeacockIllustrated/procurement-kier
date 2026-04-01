@@ -74,13 +74,9 @@ export default function BasketPage() {
                   )}
                 </p>
               )}
-              {item.customSign || item.customSizeData?.requiresQuote ? (
-                <p className="text-amber-600 font-semibold mt-1.5 text-sm">Quote on request</p>
-              ) : (
-                <p className="text-brand-navy font-semibold mt-1.5 text-sm">
-                  {"\u00A3"}{item.price.toFixed(2)} each
-                </p>
-              )}
+              <p className="mt-1.5">
+                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2 py-0.5 rounded-full border border-amber-200 text-[11px] tracking-wide">TBD</span>
+              </p>
             </div>
 
             <div className="flex flex-col items-end justify-between">
@@ -111,79 +107,29 @@ export default function BasketPage() {
                 </button>
               </div>
 
-              {item.customSign || item.customSizeData?.requiresQuote ? (
-                <p className="font-bold text-amber-600 text-xs">Quote</p>
-              ) : (
-                <p className="font-bold text-brand-navy text-sm">
-                  {"\u00A3"}{(item.price * item.quantity).toFixed(2)}
-                </p>
-              )}
+              <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Free delivery nudge */}
-      {deliveryFee > 0 && (() => {
-        const remaining = Math.ceil((100 - totalPrice) * 100) / 100;
-        return (
-          <div className="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-            <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
-            </svg>
-            <div>
-              <p className="text-sm font-medium text-amber-800">
-                Spend {"\u00A3"}{remaining.toFixed(2)} more to get free delivery!
-              </p>
-              <p className="text-xs text-amber-600 mt-0.5">Free delivery on all orders over {"\u00A3"}100.</p>
-              <Link href="/" className="inline-block mt-2 text-xs font-semibold text-brand-primary hover:underline">
-                Continue shopping &rarr;
-              </Link>
-            </div>
-          </div>
-        );
-      })()}
-
-      {deliveryFee === 0 && (
-        <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
-          <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <p className="text-sm font-medium text-emerald-700">Your order qualifies for free delivery!</p>
-        </div>
-      )}
-
       <div className="mt-4 bg-white rounded-2xl border border-gray-100 p-6">
         <div className="flex justify-between items-center mb-3">
           <span className="text-gray-500">Subtotal (ex. VAT)</span>
-          <span className="text-xl font-bold text-brand-navy">
-            {"\u00A3"}{totalPrice.toFixed(2)}
-          </span>
+          <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2.5 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span>
         </div>
         <div className="flex justify-between items-center mb-3 text-sm">
           <span className="text-gray-500">Delivery</span>
-          {deliveryFee > 0 ? (
-            <span className="text-gray-700">{"\u00A3"}{deliveryFee.toFixed(2)}</span>
-          ) : (
-            <span className="text-brand-primary font-medium">FREE</span>
-          )}
+          <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2.5 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span>
         </div>
         <div className="flex justify-between items-center mb-4 text-sm text-gray-400">
           <span>VAT (20%)</span>
-          <span>{"\u00A3"}{((totalPrice + deliveryFee) * 0.2).toFixed(2)}</span>
+          <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2.5 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span>
         </div>
         <div className="flex justify-between items-center mb-6 border-t border-gray-100 pt-4">
           <span className="text-lg font-bold text-brand-navy">Total (inc. VAT)</span>
-          <span className="text-2xl font-bold text-brand-primary">
-            {"\u00A3"}{((totalPrice + deliveryFee) * 1.2).toFixed(2)}
-          </span>
+          <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-3 py-1 rounded-full border border-amber-200 text-sm tracking-wide">TBD</span>
         </div>
-
-        {items.some((i) => i.customSign || i.customSizeData?.requiresQuote) && (
-          <p className="text-xs text-amber-600 mb-4 leading-relaxed">
-            This order includes items requiring a quote. Final pricing for those items will be confirmed after review.
-          </p>
-        )}
 
         <div className="flex gap-3">
           <Link

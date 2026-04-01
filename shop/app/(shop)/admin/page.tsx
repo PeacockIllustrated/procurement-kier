@@ -569,8 +569,8 @@ export default function AdminPage() {
                         <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusColors[order.status] || "bg-gray-100 text-gray-500"}`}>
                           {statusLabels[order.status] || order.status}
                         </span>
-                        <p className="text-sm font-bold text-brand-navy mt-1.5">
-                          {"\u00A3"}{order.total.toFixed(2)}
+                        <p className="mt-1.5">
+                          <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                         </p>
                         <p className="text-[11px] text-gray-400 mt-0.5">
                           {new Date(order.createdAt).toLocaleDateString("en-GB")}
@@ -828,18 +828,7 @@ export default function AdminPage() {
                                           </button>
                                         </div>
                                       ) : (
-                                        <div className="flex items-center justify-end gap-1">
-                                          <span className="text-gray-700">{"\u00A3"}{(item.price * item.quantity).toFixed(2)}</span>
-                                          <button
-                                            onClick={() => setEditingPrices((prev) => ({ ...prev, [item.id]: "" }))}
-                                            className="text-gray-300 hover:text-brand-primary transition ml-0.5"
-                                            title="Edit price"
-                                          >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                          </button>
-                                        </div>
+                                        <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                                       )}
                                     </td>
                                   </tr>
@@ -891,21 +880,8 @@ export default function AdminPage() {
                                             {savingPrice === item.id ? "..." : "Save"}
                                           </button>
                                         </div>
-                                      ) : item.customData.requiresQuote && item.price > 0 && editingPrices[item.id] === undefined ? (
-                                        <div className="flex items-center justify-end gap-1">
-                                          <span className="text-gray-700">{"\u00A3"}{(item.price * item.quantity).toFixed(2)}</span>
-                                          <button
-                                            onClick={() => setEditingPrices((prev) => ({ ...prev, [item.id]: "" }))}
-                                            className="text-gray-300 hover:text-brand-primary transition ml-0.5"
-                                            title="Edit price"
-                                          >
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                          </button>
-                                        </div>
                                       ) : (
-                                        <span className="text-gray-700">{"\u00A3"}{(item.price * item.quantity).toFixed(2)}</span>
+                                        <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                                       )}
                                     </td>
                                   </tr>
@@ -939,7 +915,7 @@ export default function AdminPage() {
                                     )}
                                   </td>
                                   <td className="py-2.5 text-center text-gray-500">{item.quantity}</td>
-                                  <td className="py-2.5 text-right font-medium">{"\u00A3"}{(item.price * item.quantity).toFixed(2)}</td>
+                                  <td className="py-2.5 text-right"><span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span></td>
                                 </tr>
                               );
                             })}
@@ -947,21 +923,19 @@ export default function AdminPage() {
                           <tfoot>
                             <tr className="border-t border-gray-100">
                               <td colSpan={3} className="pt-2.5 text-right text-gray-500">Subtotal</td>
-                              <td className="pt-2.5 text-right">{"\u00A3"}{order.subtotal.toFixed(2)}</td>
+                              <td className="pt-2.5 text-right"><span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span></td>
                             </tr>
                             <tr>
                               <td colSpan={3} className="text-right text-gray-400 text-xs">Delivery</td>
-                              <td className="text-right text-gray-400 text-xs">
-                                {order.deliveryFee > 0 ? <>{"\u00A3"}{order.deliveryFee.toFixed(2)}</> : <span className="text-brand-primary font-medium">FREE</span>}
-                              </td>
+                              <td className="text-right"><span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span></td>
                             </tr>
                             <tr>
                               <td colSpan={3} className="text-right text-gray-400 text-xs">VAT</td>
-                              <td className="text-right text-gray-400 text-xs">{"\u00A3"}{order.vat.toFixed(2)}</td>
+                              <td className="text-right"><span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span></td>
                             </tr>
                             <tr className="font-bold text-brand-navy">
                               <td colSpan={3} className="pt-2 text-right">Total</td>
-                              <td className="pt-2 text-right">{"\u00A3"}{order.total.toFixed(2)}</td>
+                              <td className="pt-2 text-right"><span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span></td>
                             </tr>
                             {orderNeedsPricing(order) && (
                               <tr>

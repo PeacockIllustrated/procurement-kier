@@ -80,9 +80,7 @@ export default function Header() {
                 <>
                   <span className="text-brand-navy">{totalItems}</span>
                   <span className="text-gray-300">|</span>
-                  <span className="text-brand-primary font-semibold">
-                    {"\u00A3"}{totalPrice.toFixed(2)}
-                  </span>
+                  <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-primary rounded-full" />
                 </>
               )}

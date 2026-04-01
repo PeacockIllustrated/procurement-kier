@@ -6,6 +6,22 @@
       "description": "Save money and time when ordering signage with these great value temporary site sign packs.",
       "products": [
         {
+          "baseCode": "PA115",
+          "variants": [
+            {
+              "code": "PA115",
+              "size": null,
+              "material": "4mm Correx",
+              "description": "Site Setup Pack (4mm Correx)",
+              "price": 437.39,
+              "clientPrice": 345.54,
+              "sizeSuffix": null
+            }
+          ],
+          "name": "Site Setup Pack",
+          "image": "/images/products/PA115.webp"
+        },
+        {
           "baseCode": "PCFS118",
           "variants": [
             {
@@ -22,7 +38,7 @@
           "image": "/images/products/PCFS118.png"
         }
       ],
-      "productCount": 1
+      "productCount": 2
     },
     {
       "name": "Environmental Signs",

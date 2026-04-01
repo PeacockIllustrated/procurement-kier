@@ -496,13 +496,7 @@ export default function CheckoutPage() {
                     <span className="text-gray-500 truncate mr-2">
                       {item.customSign ? "Custom Sign" : item.customSizeData?.requiresQuote ? "Custom Size (Quote)" : item.code} x{item.quantity}
                     </span>
-                    {item.customSign || item.customSizeData?.requiresQuote ? (
-                      <span className="font-medium text-amber-600 shrink-0 text-xs">Quote</span>
-                    ) : (
-                      <span className="font-medium text-gray-700 shrink-0">
-                        {"\u00A3"}{(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    )}
+                    <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide shrink-0">TBD</span>
                   </div>
                   {item.customFieldValues && item.customFieldValues.length > 0 && (
                     <div className="ml-1 mt-0.5">
@@ -520,23 +514,19 @@ export default function CheckoutPage() {
             <div className="border-t border-gray-100 pt-3 space-y-2">
               <div className="flex justify-between text-sm text-gray-400">
                 <span>Subtotal</span>
-                <span>{"\u00A3"}{totalPrice.toFixed(2)}</span>
+                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
               </div>
               <div className="flex justify-between text-sm text-gray-400">
                 <span>Delivery</span>
-                {deliveryFee > 0 ? (
-                  <span>{"\u00A3"}{deliveryFee.toFixed(2)}</span>
-                ) : (
-                  <span className="text-brand-primary font-medium">FREE</span>
-                )}
+                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
               </div>
               <div className="flex justify-between text-sm text-gray-400">
                 <span>VAT (20%)</span>
-                <span>{"\u00A3"}{((totalPrice + deliveryFee) * 0.2).toFixed(2)}</span>
+                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-1.5 py-0.5 rounded-full border border-amber-200 text-[10px] tracking-wide">TBD</span>
               </div>
               <div className="flex justify-between font-bold text-brand-navy pt-2 border-t border-gray-100">
                 <span>Total</span>
-                <span>{"\u00A3"}{((totalPrice + deliveryFee) * 1.2).toFixed(2)}</span>
+                <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-2 py-0.5 rounded-full border border-amber-200 text-xs tracking-wide">TBD</span>
               </div>
             </div>
 

@@ -104,10 +104,7 @@ export default async function ProductPage({
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-brand-navy">
-                      {"\u00A3"}{variant.price.toFixed(2)}
-                    </p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">ex. VAT</p>
+                    <span className="inline-flex items-center bg-amber-50 text-amber-500 font-semibold px-3 py-1 rounded-full border border-amber-200 text-sm tracking-wide">TBD</span>
                   </div>
                 </div>
 
