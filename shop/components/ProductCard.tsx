@@ -10,7 +10,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/product/${encodeURIComponent(product.baseCode)}`}
-      className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-0.5 transition-all duration-300"
+      className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
     >
       <div className="aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100/50 relative overflow-hidden">
         {product.image ? (
@@ -35,12 +35,12 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
       </div>
 
-      <div className="p-3.5">
+      <div className="p-3.5 flex flex-col flex-1">
         <p className="text-[11px] text-brand-primary font-semibold tracking-wide uppercase mb-1">{product.baseCode}</p>
         <h3 className="text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-2.5 group-hover:text-brand-navy transition-colors">
           {product.name}
         </h3>
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between mt-auto">
           <TbdPrice className="text-xs" />
           <span className="text-[11px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-0.5">
             View
