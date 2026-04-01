@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { AnalyticsProvider } from "@/components/analytics-provider";
 import { BasketProvider } from "@/components/BasketContext";
 import Header from "@/components/Header";
 import Toast from "@/components/Toast";
@@ -24,12 +25,14 @@ export default async function ShopLayout({
   }
 
   return (
-    <BasketProvider>
-      <SplashScreen />
-      <Header />
-      <main className="min-h-screen">{children}</main>
-      <Toast />
-      <SuggestionWidget />
-    </BasketProvider>
+    <AnalyticsProvider>
+      <BasketProvider>
+        <SplashScreen />
+        <Header />
+        <main className="min-h-screen">{children}</main>
+        <Toast />
+        <SuggestionWidget />
+      </BasketProvider>
+    </AnalyticsProvider>
   );
 }

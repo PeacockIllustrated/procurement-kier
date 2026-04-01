@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { useAnalytics } from "@/components/analytics-provider";
 import type { CustomSizeData } from "@/lib/custom-size-pricing";
 import { calculateDeliveryFee } from "@/lib/delivery";
 import { brand } from "@/lib/brand";
@@ -77,6 +78,8 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     setTimeout(() => setToast(null), 2500);
   }, []);
 
+  const { track } = useAnalytics();
+
   const addItem = (item: Omit<BasketItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.code === item.code);
@@ -87,10 +90,22 @@ export function BasketProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { ...item, quantity }];
     });
+    track("add_to_basket", {
+      productCode: item.code,
+      productName: item.name,
+      quantity,
+    });
     showToast(`${quantity}x added to basket`);
   };
 
   const removeItem = (code: string) => {
+    const item = items.find((i) => i.code === code);
+    if (item) {
+      track("remove_from_basket", {
+        productCode: item.code,
+        productName: item.name,
+      });
+    }
     setItems((prev) => prev.filter((i) => i.code !== code));
   };
 
